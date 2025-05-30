@@ -11,7 +11,6 @@ class COLLIDER{
         this.xBB = xBB;
         this.yBB = yBB;
         this.percision = percision;
-        this.termVel = terminateVelOnCollision;
         this.eventListenersX = [];
         this.eventListenersY = [];
         if (terminateVelOnCollision){
@@ -33,23 +32,36 @@ class COLLIDER{
             throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
     }
     removeListener(eventStr, action){
-        let temp = Math.max(eventListenersX.indexOf(action), eventListenersY.indexOf(action));
+        let temp = Math.max(this.eventListenersX.indexOf(action), this.eventListenersY.indexOf(action));
         if (temp == -1){
             console.log("Ignoring attempt to remove untracked event listener. Using this method expecting calls like this to be ignored is ill-advised.");
             return;
         }
         if (eventStr == "x")
-            eventListenersX.splice(temp,1);
+            this.eventListenersX.splice(temp,1);
         else if (eventStr == "y")
-            eventListenersY.splice(temp,1);
+            this.eventListenersY.splice(temp,1);
         else
             throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
     }
-    getListeners(){
-        return this.eventListeners;
+    clearListeners(eventStr){
+        if (eventStr == "x")
+            this.eventListenersX.splice(0);
+        else if (eventStr == "y")
+            this.eventListenersY.splice(0);
+        else
+            throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
+    }
+    getListeners(eventStr){
+        if (eventStr == "x")
+            return this.eventListenersX;
+        else if (eventStr == "y")
+            return this.eventListenersY;
+        else
+            throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
     }
     getAllProperies(){
-        return {x:this.x, y:this.y, w:this.x, h:this.y, dx:this.dx, dy:this.dy, xBB:this.xBB, yBB:this.yBB, percision: this.percision, eventListenersX: this.eventListenersX, eventListenersY: this.eventListenersY};
+        return {x:this.x, y:this.y, w:this.x, h:this.y, dx:this.dx, dy:this.dy, xBB:this.xBB, yBB:this.yBB, percision: this.percision, eventListeners: this.eventListenersX, eventListenersY: this.eventListenersY};
     }
     getBounds(string = ""){
         switch (string){
