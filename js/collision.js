@@ -12,9 +12,8 @@ class COLLIDER{
         this.yBB = yBB;
         this.percision = percision;
         this.termVel = terminateVelOnCollision;
-        this.EVENT = {x: new Event("x"), y: new Event("y")};
-        this.onCollision = new EventTarget();
-        this.eventListeners = [];
+        this.eventListenersX = [];
+        this.eventListenersY = [];
         if (terminateVelOnCollision){
             addListener("x", () => {this.dx = 0});
             addListener("y", () => {this.dy = 0});
@@ -22,41 +21,43 @@ class COLLIDER{
         AllColliders.push(this);
     }
     addListener(eventStr, action){
-        if (eventStr != "x" && eventStr != "y")
-            throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
-        if (this.eventListeners.indexOf({eventStr: eventStr, action: action}) > -1){
+        if (this.eventListenersX.indexOf(action) < -1 && this.eventListenersY.indexOf(action) < -1){
             console.log("Ignoring attempt to add dupicate event listener. Using this method expecting calls like this to be ignored is ill-advised.");
             return;
         }
-        this.onCollision.addEventListener(eventStr, action);
-        this.eventListeners.push({eventStr: eventStr, action: action});
+        if (eventStr == "x")
+            this.eventListenersX.push(action);
+        else if (eventStr == "y")
+            this.eventListenersY.push(action);
+        else
+            throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
     }
     removeListener(eventStr, action){
-        if (eventStr != "x" && eventStr != "y")
-            throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
-        if (this.eventListeners.indexOf({eventStr: eventStr, action: action}) > -1){
+        let temp = Math.max(eventListenersX.indexOf(action), eventListenersY.indexOf(action));
+        if (temp == -1){
             console.log("Ignoring attempt to remove untracked event listener. Using this method expecting calls like this to be ignored is ill-advised.");
             return;
         }
-        this.onCollision.addEventListener(eventStr, action);
-        let temp = this.eventListeners.indexOf({eventStr: eventStr, action: action});
-        this.eventListeners.splice(temp,1);
+        if (eventStr == "x")
+            eventListenersX.splice(temp,1);
+        else if (eventStr == "y")
+            eventListenersY.splice(temp,1);
+        else
+            throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
     }
     getListeners(){
         return this.eventListeners;
     }
     getAllProperies(){
-        return {x:this.x, y:this.y, w:this.x, h:this.y, dx:this.dx, dy:this.dy, xBB:this.xBB, yBB:this.yBB, percision: this.percision, eventListeners: this.eventListeners};
+        return {x:this.x, y:this.y, w:this.x, h:this.y, dx:this.dx, dy:this.dy, xBB:this.xBB, yBB:this.yBB, percision: this.percision, eventListenersX: this.eventListenersX, eventListenersY: this.eventListenersY};
     }
     getBounds(string = ""){
         switch (string){
             case ("x"):
-                return this.w;
-            case ("y"):
-                return this.h;
             case ("w"):
                 return this.w;
             case ("h"):
+            case ("y"):
                 return this.h;
             default:
                 return {x:this.w, y:this.h};
@@ -71,12 +72,10 @@ class COLLIDER{
     getOrigin(string = ""){
         switch (string){
             case ("x"):
-                return this.xBB;
-            case ("y"):
-                return this.yBB;
             case ("xBB"):
                 return this.xBB;
             case ("yBB"):
+            case ("y"):
                 return this.yBB;
             default:
                 return {x:this.dx, y:this.dy};
@@ -88,11 +87,9 @@ class COLLIDER{
     getVelocity(string = ""){
         switch (string){
             case ("x"):
-                return this.dx;
-            case ("y"):
-                return this.dy;
             case ("dx"):
                 return this.dx;
+            case ("y"):
             case ("dy"):
                 return this.dy;
             default:
@@ -109,6 +106,8 @@ class COLLIDER{
         let xa1 = xa0+this.w;
         let ya1 = ya0+this.h;
         for (let i = 0; i < AllColliders.length; i++){
+            if (this == AllColliders[i])
+                continue;
             let temp = AllColliders[i]
             let xb0 = temp.xBB+temp.x;
             let yb0 = temp.yBB+temp.y;
@@ -131,7 +130,8 @@ class COLLIDER{
                 x += temp;
                 i -= temp;
             }else{
-                this.onCollision.dispatchEvent(this.EVENT.x);
+                for (let action in this.eventListenersX)
+                    action();
                 i = 0;
             }
             temp = clamp(j,-1,1);
@@ -139,7 +139,8 @@ class COLLIDER{
                 y += temp;
                 j -= temp;
             }else{
-                this.onCollision.dispatchEvent(this.EVENT.y);
+                for (let action in this.eventListenersY)
+                    action();
                 j = 0;
             }
         }
