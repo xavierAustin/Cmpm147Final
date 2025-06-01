@@ -8,6 +8,15 @@ s = function(p){
         //p.select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
         //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
+        p.player = new PLAYER({
+            idle: [p.loadImage('./assets/player/idle.png')],
+            idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
+            idleDw: [p.loadImage('./assets/player/idle_lookdown.png')],
+            idle: [p.loadImage('./assets/player/idle.png')],
+            idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
+            idleDw: [p.loadImage('./assets/player/idle_lookdown.png')],
+            sleep: [p.loadImage('./assets/player/sit.png'),p.loadImage('./assets/player/sit.png')]
+        });
     }
     p.draw = function(){
         p.background(125);

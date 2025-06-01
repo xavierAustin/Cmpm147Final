@@ -134,26 +134,23 @@ class COLLIDER{
     update(){
         let i = this.dx;
         let j = this.dy;
-        let temp = 0;
 
         while ((i != 0 || j != 0)){
-            temp = clamp(i,-1,1);
-            if (!this.meeting(x+temp,y)){
-                x += temp;
-                i -= temp;
+            let dx = clamp(i,-1,1);
+            if (!this.meeting(x+dx,y)){
+                x += dx;
+                i -= dx;
             }else{
                 for (let action in this.eventListenersX)
                     action();
-                i = 0;
             }
-            temp = clamp(j,-1,1);
-            if (!this.meeting(x,y+temp)){
-                y += temp;
-                j -= temp;
+            let dy = clamp(j,-1,1);
+            if (!this.meeting(x,y+dy)){
+                y += dy;
+                j -= dy;
             }else{
                 for (let action in this.eventListenersY)
                     action();
-                j = 0;
             }
         }
     }
