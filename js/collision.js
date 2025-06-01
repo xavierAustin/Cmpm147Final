@@ -1,5 +1,9 @@
 var AllColliders = [];
 
+function clamp(x, min, max){
+    return Math.max(min, Math.min(max, x));
+}
+
 class COLLIDER{
     constructor(w, h, x = 0, y = 0, dx = 0, dy = 0, xBB = 0, yBB = 0, percision = 1, terminateVelOnCollision = true){
         this.x = x;
@@ -14,8 +18,8 @@ class COLLIDER{
         this.eventListenersX = [];
         this.eventListenersY = [];
         if (terminateVelOnCollision){
-            addListener("x", () => {this.dx = 0});
-            addListener("y", () => {this.dy = 0});
+            this.addListener("x", () => {this.dx = 0});
+            this.addListener("y", () => {this.dy = 0});
         }
         AllColliders.push(this);
     }
@@ -63,6 +67,20 @@ class COLLIDER{
     getAllProperies(){
         return {x:this.x, y:this.y, w:this.x, h:this.y, dx:this.dx, dy:this.dy, xBB:this.xBB, yBB:this.yBB, percision: this.percision, eventListeners: this.eventListenersX, eventListenersY: this.eventListenersY};
     }
+    getPosition(string = ""){
+        switch (string){
+            case ("x"):
+                return this.x;
+            case ("y"):
+                return this.y;
+            default:
+                return {x:this.x, y:this.y};
+        }
+    }
+    setPosition(x, y){
+        this.x = x;
+        this.y = y;
+    }
     getBounds(string = ""){
         switch (string){
             case ("x"):
@@ -109,8 +127,8 @@ class COLLIDER{
         }
     }
     setVelocity(dx, dy){
-        this.dy = dx;
-        this.dx = dy;
+        this.dx = dx;
+        this.dy = dy;
     }
     meeting(x,y){
         let xa0 = this.xBB+x;
@@ -132,26 +150,27 @@ class COLLIDER{
         return false;
     }
     update(){
-        let i = this.dx;
-        let j = this.dy;
+        let _dx = this.dx;
+        let _dy = this.dy;
+        let temp = 0;
 
-        while ((i != 0 || j != 0)){
-            let dx = clamp(i,-1,1);
-            if (!this.meeting(x+dx,y)){
-                x += dx;
-                i -= dx;
+        while ((_dx != 0 || _dy != 0)){
+            temp = clamp(_dx,-1,1);
+            if (!this.meeting(this.x+temp,this.y)){
+                this.x += temp;
             }else{
-                for (let action in this.eventListenersX)
-                    action();
+                for (let i = 0; i < this.eventListenersX.length; i++)
+                    this.eventListenersX[i]();
             }
-            let dy = clamp(j,-1,1);
-            if (!this.meeting(x,y+dy)){
-                y += dy;
-                j -= dy;
+            _dx = (_dx - temp);
+            temp = clamp(_dy,-1,1);
+            if (!this.meeting(this.x,this.y+temp)){
+                this.y += temp;
             }else{
-                for (let action in this.eventListenersY)
-                    action();
+                for (let i = 0; i < this.eventListenersY.length; i++)
+                    this.eventListenersY[i]();
             }
+            _dy = (_dy - temp);
         }
     }
 }
