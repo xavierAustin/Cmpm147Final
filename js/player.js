@@ -5,14 +5,79 @@ class PLAYER{
         this.p = p;
         this.col = new COLLIDER(w,h,x,y,0,0,bbx,bby);
         this.anim = images;
+        this.ctjump = 0; //coyote time jump (if you press jump late you still get to jump)
+        this.jumpBuffer = 0;
         this.state = "idle";
     }
     update(){
+        let x = this.col.getPosition("x");
+        let y = this.col.getPosition("y");
+        let _dx = this.col.getVelocity("x");
+        let _dy = this.col.getVelocity("y");
+        let move = (inputs.right.h-inputs.left.h);
+        this.jumpBuffer -= Math.max(this.jumpBuffer - 1, 0);
+        //six frames of buffer (if you press jump early youll jump whenever possible)
+        if (inputs.jump.p)
+            this.jumpBuffer = 6;
         switch (this.state){
             default:
+                //image_index = (idleanim > 0)*12+(idleanim == 500)
+                _dx /= 5;
+                _dy = 1.5;
+                //idleanim = min(idleanim + 1,500);
+                if (this.jumpBuffer){
+                    _dy = -4.3;
+                    this.state = "jump";
+                }else if (move != 0)
+                    this.state = "run";
+                else if (!this.col.meeting(x,y+2))
+                    this.ctjump ++;
+                if (this.ctjump > 3)
+                    this.state = "fall";
+                //if state != "idle" || ku || kd || ks
+                //    idleanim = -600 + irandom_range(-120,60);
+            break;
+            case "run":
+                //image_index = max((image_index + 0.33) % 4,1);
+                _dx = (move+_dx*4)/5;
+                _dy = 1.5;
+                if (this.jumpBuffer){
+                    _dy = -5;
+                    this.state = "jump";
+                }else if (!this.col.meeting(x,y+2))
+                    this.ctjump ++;
+                else if (move == 0)
+                    this.state = "idle";
+                if (this.ctjump > 3)
+                    this.state = "fall";
+            break;
+            case "jump":
+                this.ctjump = 0;
+                this.jumpBuffer = 0;
+                //image_index = 3;
+                if (!inputs.jump.h && _dy < 0)
+                    _dy *= 0.6;
+                _dx = (move + _dx*8)/9;
+                _dy += 0.2-0.1*(_dy > -1 && inputs.jump.h);
+                if (_dy > 1)
+                    this.state = "fall";
+                else if (move == 0 && this.col.meeting(x,y+2))
+                    this.state = "idle";
+                else if (this.col.meeting(x,y+2))
+                    this.state = "run";
+            break;
+            case "fall":
+                this.ctjump = 0;
+                //image_index = 1;
+                _dx = (move + _dx*8)/9;
+                _dy += 0.3;
+                if (move == 0 && this.col.meeting(x,y+2))
+                    this.state = "idle";
+                else if (this.col.meeting(x,y+2))
+                    this.state = "run";
             break;
         }
-        this.col.setVelocity(1, this.col.getVelocity("y") + 0.1);
+        this.col.setVelocity(_dx, _dy + 0.1);
         this.col.update();
     }
     draw(){

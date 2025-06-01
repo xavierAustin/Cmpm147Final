@@ -1,3 +1,12 @@
+inputs = {
+    jump: {r:false,p:false,h:false},
+    act: {r:false,p:false,h:false},
+    up: {r:false,p:false,h:false},
+    down: {r:false,p:false,h:false},
+    left: {r:false,p:false,h:false},
+    right: {r:false,p:false,h:false}
+}
+
 s = function(p){
     p.preload = function(){
         
@@ -28,8 +37,52 @@ s = function(p){
     }
     p.draw = function(){
         p.background(125);
+        let keys = Object.getOwnPropertyNames(inputs);
+        //update inputs such that pressed and released only occur for the frame they are pressed/released
+        for (let i = 0; i < keys.length; i++){
+            inputs[keys[i]].p = false;
+            inputs[keys[i]].r = false;
+        }
         p.player.update();
         p.player.draw();
+    }
+    p.keyPressed = function(e){
+        switch (e.code){
+            case ('ArrowDown'): 
+                inputs.down = {r:false, p:true, h: true};
+            break;
+            case ('ArrowLeft'): 
+                inputs.left = {r:false, p:true, h: true};
+            break;
+            case ('ArrowUp'): 
+                inputs.up = {r:false, p:true, h: true};
+            break;
+            case ('ArrowRight'): 
+                inputs.right = {r:false, p:true, h: true};
+            break;
+            case ('Space'): 
+                inputs.jump = {r:false, p:true, h: true};
+            break;
+        }
+    }
+    p.keyReleased = function(e){
+        switch (e.code){
+            case ('ArrowDown'): 
+                inputs.down = {r:true, p:false, h: false};
+            break;
+            case ('ArrowLeft'): 
+                inputs.left = {r:true, p:false, h: false};
+            break;
+            case ('ArrowUp'): 
+                inputs.up = {r:true, p:false, h: false};
+            break;
+            case ('ArrowRight'): 
+                inputs.right = {r:true, p:false, h: false};
+            break;
+            case ('Space'): 
+                inputs.jump = {r:true, p:false, h: false};
+            break;
+        }
     }
 }
 
