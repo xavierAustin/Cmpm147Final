@@ -12,9 +12,9 @@ class PLAYER{
     update(){
         let x = this.col.getPosition("x");
         let y = this.col.getPosition("y");
-        let _dx = this.col.getVelocity("x");
-        let _dy = this.col.getVelocity("y");
-        let move = (inputs.right.h-inputs.left.h);
+        let _dx = this.col.getVelocity("x") / 4;
+        let _dy = this.col.getVelocity("y") / 4;
+        let move = (inputs.right.h-inputs.left.h) * 1.4;
         this.jumpBuffer -= Math.max(this.jumpBuffer - 1, 0);
         //six frames of buffer (if you press jump early youll jump whenever possible)
         if (inputs.jump.p)
@@ -26,7 +26,7 @@ class PLAYER{
                 _dy = 1.5;
                 //idleanim = min(idleanim + 1,500);
                 if (this.jumpBuffer){
-                    _dy = -4.3;
+                    _dy = -3.9;
                     this.state = "jump";
                 }else if (move != 0)
                     this.state = "run";
@@ -42,7 +42,7 @@ class PLAYER{
                 _dx = (move+_dx*4)/5;
                 _dy = 1.5;
                 if (this.jumpBuffer){
-                    _dy = -5;
+                    _dy = -4.5;
                     this.state = "jump";
                 }else if (!this.col.meeting(x,y+2))
                     this.ctjump ++;
@@ -58,7 +58,7 @@ class PLAYER{
                 if (!inputs.jump.h && _dy < 0)
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
-                _dy += 0.2-0.1*(_dy > -1 && inputs.jump.h);
+                _dy += 0.17-0.1*(_dy > -1 && inputs.jump.h);
                 if (_dy > 1)
                     this.state = "fall";
                 else if (move == 0 && this.col.meeting(x,y+2))
@@ -70,14 +70,14 @@ class PLAYER{
                 this.ctjump = 0;
                 //image_index = 1;
                 _dx = (move + _dx*8)/9;
-                _dy += 0.3;
+                _dy += 0.25;
                 if (move == 0 && this.col.meeting(x,y+2))
                     this.state = "idle";
                 else if (this.col.meeting(x,y+2))
                     this.state = "run";
             break;
         }
-        this.col.setVelocity(_dx, _dy + 0.1);
+        this.col.setVelocity(_dx * 4, _dy * 4);
         this.col.update();
     }
     draw(){

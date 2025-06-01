@@ -37,14 +37,14 @@ s = function(p){
     }
     p.draw = function(){
         p.background(125);
-        let keys = Object.getOwnPropertyNames(inputs);
+        p.player.update();
+        p.player.draw();
         //update inputs such that pressed and released only occur for the frame they are pressed/released
+        let keys = Object.getOwnPropertyNames(inputs);
         for (let i = 0; i < keys.length; i++){
             inputs[keys[i]].p = false;
             inputs[keys[i]].r = false;
         }
-        p.player.update();
-        p.player.draw();
     }
     p.keyPressed = function(e){
         switch (e.code){
@@ -64,6 +64,7 @@ s = function(p){
                 inputs.jump = {r:false, p:true, h: true};
             break;
         }
+        console.log(e.code);
     }
     p.keyReleased = function(e){
         switch (e.code){
