@@ -1,5 +1,5 @@
 class PLAYER{
-    constructor(p, images = {}, x = 0, y = 0, w = 16, h = 96, bbx = 48, bby = 32){
+    constructor(p, images = {}, x = 0, y = 0, w = 40, h = 96, bbx = 44, bby = 32){
         if (Object.keys(images).length == 0)
             console.log("Player has no frame data.");
         this.p = p;
@@ -10,6 +10,7 @@ class PLAYER{
         this.state = "idle";
         this.anim_index = 0;
         this.anim_current = "idle";
+        this.facing = 1;
     }
     update(){
         let x = this.col.getPosition("x");
@@ -85,6 +86,8 @@ class PLAYER{
             this.anim_current += "Dw";
         if (!inputs.down.h && inputs.up.h)
             this.anim_current += "Up";
+        if (move != 0)
+            this.facing = Math.sign(move);
         //handle collision
         this.col.setVelocity(_dx * 4, _dy * 4);
         this.col.update();
@@ -92,7 +95,8 @@ class PLAYER{
     draw(){
         this.p.push();
         this.p.translate(this.col.getPosition("x"),this.col.getPosition("y"));
-        this.p.scale(1,1);
+        this.p.translate((this.facing == -1)? 128 : 0, 0);
+        this.p.scale(this.facing,1);
         let temp = this.anim[this.anim_current].length
         this.p.image(this.anim[this.anim_current][Math.floor(this.anim_index) % temp],0,0,128,128);
         this.p.pop();
