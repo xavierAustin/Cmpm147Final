@@ -5,12 +5,13 @@ class PLAYER{
         this.p = p;
         this.col = new COLLIDER(w,h,x,y,0,0,bbx,bby);
         this.anim = images;
-        this.ctjump = 0; //coyote time jump (if you press jump late you still get to jump)
+        this.ctjump = 0; //3 frame coyote time jump (if you press jump late you still get to jump)
         this.jumpBuffer = 0;
         this.state = "idle";
         this.anim_index = 0;
         this.anim_current = "idle";
         this.facing = 1;
+        this.sleepTimer = 0;
     }
     update(){
         let x = this.col.getPosition("x");
@@ -19,17 +20,15 @@ class PLAYER{
         let _dy = this.col.getVelocity("y") / 4;
         let move = (inputs.right.h-inputs.left.h) * 1.4;
         this.jumpBuffer -= Math.max(this.jumpBuffer - 1, 0);
-        //six frames of buffer (if you press jump early youll jump whenever possible)
+        //6 frames buffer (if you press jump early youll jump whenever possible)
         if (inputs.jump.p)
             this.jumpBuffer = 6;
         switch (this.state){
             default:
-                //image_index = (idleanim > 0)*12+(idleanim == 500)
                 _dx /= 5;
                 _dy = 1.5;
-                //idleanim = min(idleanim + 1,500);
                 if (this.jumpBuffer){
-                    _dy = -3.9;
+                    _dy = -3.7;
                     this.state = "jump";
                 }else if (move != 0)
                     this.state = "run";
@@ -37,14 +36,12 @@ class PLAYER{
                     this.ctjump ++;
                 if (this.ctjump > 3)
                     this.state = "fall";
-                //if state != "idle" || ku || kd || ks
-                //    idleanim = -600 + irandom_range(-120,60);
             break;
             case "run":
                 _dx = (move+_dx*4)/5;
                 _dy = 1.5;
                 if (this.jumpBuffer){
-                    _dy = -4.5;
+                    _dy = -4.2;
                     this.state = "jump";
                 }else if (!this.col.meeting(x,y+2))
                     this.ctjump ++;
@@ -56,7 +53,6 @@ class PLAYER{
             case "jump":
                 this.ctjump = 0;
                 this.jumpBuffer = 0;
-                //image_index = 3;
                 if (!inputs.jump.h && _dy < 0)
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
@@ -70,7 +66,6 @@ class PLAYER{
             break;
             case "fall":
                 this.ctjump = 0;
-                //image_index = 1;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.25;
                 if (move == 0 && this.col.meeting(x,y+2))
@@ -88,6 +83,12 @@ class PLAYER{
             this.anim_current += "Up";
         if (move != 0)
             this.facing = Math.sign(move);
+        if (this.state != "idle")
+            this.sleepTimer = this.p.frameCount
+        else if (this.p.frameCount - this.sleepTimer > 1500)
+            this.anim_current = "sleep";
+        else if (this.p.frameCount - this.sleepTimer > 900)
+            this.anim_current = "sit";
         //handle collision
         this.col.setVelocity(_dx * 4, _dy * 4);
         this.col.update();

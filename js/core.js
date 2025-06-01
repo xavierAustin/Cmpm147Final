@@ -1,3 +1,5 @@
+const COLLIDERDEBUG = true;
+
 inputs = {
     jump: {r:false,p:false,h:false},
     act: {r:false,p:false,h:false},
@@ -30,21 +32,34 @@ s = function(p){
             fall: [],
             fallUp: [],
             fallDw: [],
-            sleep: [p.loadImage('./assets/player/sit.png'),p.loadImage('./assets/player/sit.png')]
+            sit: [p.loadImage('./assets/player/sit.png')],
+            sleep: [p.loadImage('./assets/player/sleep.png')]
         });
+        //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
         p.player.anim.jump.push(p.player.anim.run.at(-1));
         p.player.anim.jumpUp.push(p.player.anim.runUp.at(-1));
         p.player.anim.jumpDw.push(p.player.anim.runDw.at(-1));
         p.player.anim.fall.push(p.player.anim.run.at(0));
         p.player.anim.fallUp.push(p.player.anim.runUp.at(0));
         p.player.anim.fallDw.push(p.player.anim.runDw.at(0)); 
-        //debug floor
+        //debug floor and platforms
         p.floor = new COLLIDER(p.width,32,0,p.height-32);
+        p.floor = new COLLIDER(400,32,200,p.height-236);
     }
     p.draw = function(){
         p.background(125);
+        //update player
         p.player.update();
+        //update stuff
+
+        //debug colision draw
+        for (let i = 0; i < COLLIDERDEBUG * AllColliders.length; i ++){
+            p.rect(AllColliders[i].x+AllColliders[i].xBB,AllColliders[i].y+AllColliders[i].yBB,AllColliders[i].w,AllColliders[i].h)
+        }
+        //draw player
         p.player.draw();
+        //draw stuff
+
         //update inputs such that pressed and released only occur for the frame they are pressed/released
         let keys = Object.getOwnPropertyNames(inputs);
         for (let i = 0; i < keys.length; i++){
