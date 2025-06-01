@@ -8,6 +8,8 @@ class PLAYER{
         this.ctjump = 0; //coyote time jump (if you press jump late you still get to jump)
         this.jumpBuffer = 0;
         this.state = "idle";
+        this.anim_index = 0;
+        this.anim_current = "idle";
     }
     update(){
         let x = this.col.getPosition("x");
@@ -38,7 +40,6 @@ class PLAYER{
                 //    idleanim = -600 + irandom_range(-120,60);
             break;
             case "run":
-                //image_index = max((image_index + 0.33) % 4,1);
                 _dx = (move+_dx*4)/5;
                 _dy = 1.5;
                 if (this.jumpBuffer){
@@ -77,6 +78,14 @@ class PLAYER{
                     this.state = "run";
             break;
         }
+        //handle animations
+        this.anim_index = (this.anim_index + 0.33);
+        this.anim_current = this.state;
+        if (inputs.down.h && !inputs.up.h)
+            this.anim_current += "Dw";
+        if (!inputs.down.h && inputs.up.h)
+            this.anim_current += "Up";
+        //handle collision
         this.col.setVelocity(_dx * 4, _dy * 4);
         this.col.update();
     }
@@ -84,7 +93,8 @@ class PLAYER{
         this.p.push();
         this.p.translate(this.col.getPosition("x"),this.col.getPosition("y"));
         this.p.scale(1,1);
-        this.p.image(this.anim.idle[0],0,0,128,128);
+        let temp = this.anim[this.anim_current].length
+        this.p.image(this.anim[this.anim_current][Math.floor(this.anim_index) % temp],0,0,128,128);
         this.p.pop();
     }
 }

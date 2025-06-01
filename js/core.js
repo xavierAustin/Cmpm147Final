@@ -22,8 +22,8 @@ s = function(p){
             idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
             idleDw: [p.loadImage('./assets/player/idle_lookdown.png')],
             run: [p.loadImage('./assets/player/run0.png'),p.loadImage('./assets/player/run1.png'),p.loadImage('./assets/player/run2.png')],
-            runUp: [p.loadImage('./assets/player/run0.png'),p.loadImage('./assets/player/run1.png'),p.loadImage('./assets/player/run2.png')],
-            runDw: [p.loadImage('./assets/player/run0.png'),p.loadImage('./assets/player/run1.png'),p.loadImage('./assets/player/run2.png')],
+            runUp: [p.loadImage('./assets/player/run0_lookup.png'),p.loadImage('./assets/player/run1_lookup.png'),p.loadImage('./assets/player/run2_lookup.png')],
+            runDw: [p.loadImage('./assets/player/run0_lookdown.png'),p.loadImage('./assets/player/run1_lookdown.png'),p.loadImage('./assets/player/run2_lookdown.png')],
             jump: [],
             jumpUp: [],
             jumpDw: [],
@@ -32,6 +32,12 @@ s = function(p){
             fallDw: [],
             sleep: [p.loadImage('./assets/player/sit.png'),p.loadImage('./assets/player/sit.png')]
         });
+        p.player.anim.jump.push(p.player.anim.run.at(-1));
+        p.player.anim.jumpUp.push(p.player.anim.runUp.at(-1));
+        p.player.anim.jumpDw.push(p.player.anim.runDw.at(-1));
+        p.player.anim.fall.push(p.player.anim.run.at(0));
+        p.player.anim.fallUp.push(p.player.anim.runUp.at(0));
+        p.player.anim.fallDw.push(p.player.anim.runDw.at(0)); 
         //debug floor
         p.floor = new COLLIDER(p.width,32,0,p.height-32);
     }
