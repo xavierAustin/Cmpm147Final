@@ -48,6 +48,8 @@ s = function(p){
             fall: [],
             fallUp: [],
             fallDw: [],
+            crouch: [p.loadImage('./assets/player/duck.png')],
+            crawl: [p.loadImage('./assets/player/worm0.png'),p.loadImage('./assets/player/worm0.png'),p.loadImage('./assets/player/worm1.png'),p.loadImage('./assets/player/worm1.png'),p.loadImage('./assets/player/worm2.png'),p.loadImage('./assets/player/worm2.png'),p.loadImage('./assets/player/worm3.png'),p.loadImage('./assets/player/worm3.png')],
             sit: [p.loadImage('./assets/player/sit.png')],
             sleep: [p.loadImage('./assets/player/sleep.png')],
             grapple: p.loadImage('./assets/player/grapple.png')
@@ -58,7 +60,8 @@ s = function(p){
         p.player.anim.jumpDw.push(p.player.anim.runDw.at(-1));
         p.player.anim.fall.push(p.player.anim.run.at(0));
         p.player.anim.fallUp.push(p.player.anim.runUp.at(0));
-        p.player.anim.fallDw.push(p.player.anim.runDw.at(0)); 
+        p.player.anim.fallDw.push(p.player.anim.runDw.at(0));
+
         //debug floor and platforms
         p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
         p.randomSeed()
