@@ -48,7 +48,8 @@ s = function(p){
             fallUp: [],
             fallDw: [],
             sit: [p.loadImage('./assets/player/sit.png')],
-            sleep: [p.loadImage('./assets/player/sleep.png')]
+            sleep: [p.loadImage('./assets/player/sleep.png')],
+            grapple: p.loadImage('./assets/player/grapple.png')
         });
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
         p.player.anim.jump.push(p.player.anim.run.at(-1));
@@ -123,11 +124,16 @@ s = function(p){
             case ('ArrowRight'): 
                 inputs.right = {r:false, p:true, h: true};
             break;
+            case ('KeyZ'):
             case ('Space'): 
                 inputs.jump = {r:false, p:true, h: true};
             break;
+            case ('ShiftLeft'): 
+            case ('ShiftRight'):
+            case ('KeyX'): 
+                inputs.act = {r:false, p:true, h: true};
+            break;
         }
-        console.log(e.code);
     }
     p.keyReleased = function(e){
         switch (e.code){
@@ -147,8 +153,14 @@ s = function(p){
             case ('ArrowRight'): 
                 inputs.right = {r:true, p:false, h: false};
             break;
+            case ('KeyZ'):
             case ('Space'): 
                 inputs.jump = {r:true, p:false, h: false};
+            break;
+            case ('ShiftLeft'): 
+            case ('ShiftRight'):
+            case ('KeyX'): 
+                inputs.act = {r:true, p:false, h: false};
             break;
         }
     }
