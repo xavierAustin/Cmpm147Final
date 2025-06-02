@@ -32,6 +32,8 @@ s = function(p){
         p.select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
         //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
+        p.cameraOffset = 0;
+        p.worldWidth = p.width * 2; // Set world width to 2x window width
         p.player = new PLAYER(p, {
             idle: [p.loadImage('./assets/player/idle.png')],
             idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
@@ -56,8 +58,7 @@ s = function(p){
         p.player.anim.fallUp.push(p.player.anim.runUp.at(0));
         p.player.anim.fallDw.push(p.player.anim.runDw.at(0)); 
         //debug floor and platforms
-        p.floor = new COLLIDER(p.width,32,0,p.height-32);
-        //p.floor = new COLLIDER(400,32,200,p.height-236);
+        p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
         p.randomSeed()
         p.platforms = [];
         p.tileSize = 40;
@@ -65,6 +66,17 @@ s = function(p){
     }
     p.draw = function(){
         p.background(125);
+        
+        // Update camera position to follow player
+        let targetOffset = p.player.col.getPosition("x") - p.width/2;
+        p.cameraOffset = p.lerp(p.cameraOffset, targetOffset, 0.1);
+        
+        // Clamp camera offset to world bounds
+        p.cameraOffset = p.constrain(p.cameraOffset, 0, p.worldWidth - p.width);
+        
+        p.push();
+        p.translate(-p.cameraOffset, 0);
+        
         //update player
         p.player.update();
         //update stuff
@@ -83,14 +95,15 @@ s = function(p){
             inputs[keys[i]].p = false;
             inputs[keys[i]].r = false;
         }
-        p.rect(0,p.height-32, p.width,32) //floor
+        p.rect(0,p.height-32, p.worldWidth,32) //floor
         for (let y = 0; y < p.height/p.tileSize; y++) {
-            for (let x = 0; x < p.width/p.tileSize; x++) {
+            for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (p.platforms[y][x] == 1) {
                     p.rect(x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 }
             }
         }
+        p.pop();
     }
     p.keyPressed = function(e){
         switch (e.code){
@@ -145,7 +158,7 @@ s = function(p){
             p.platforms[y] = []
         }
         for (let y = 0; y < p.height/p.tileSize; y++) {
-            for (let x = 0; x < p.width/p.tileSize; x++) {
+            for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (x < 5) {
                     p.platforms[y][x] = -1
                 } else if (p.random() < 0.01) {
@@ -156,6 +169,16 @@ s = function(p){
                     p.platforms[y][x] = 0
                 }
             }
+        }
+        // Add walls at both ends of the level
+        for (let y = 0; y < p.height/p.tileSize; y++) {
+            // Left wall
+            p.platforms[y][0] = 1;
+            new COLLIDER(p.tileSize, p.tileSize, 0, y*p.tileSize+18);
+            
+            // Right wall
+            p.platforms[y][p.worldWidth/p.tileSize - 1] = 1;
+            new COLLIDER(p.tileSize, p.tileSize, (p.worldWidth/p.tileSize - 1)*p.tileSize, y*p.tileSize+18);
         }
         console.log(p.platforms)
     }
