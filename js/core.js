@@ -10,17 +10,9 @@ inputs = {
 }
 
 platformAreas = [
-    [ // Wide horizontal platform
-        [1,1,1,1,1]
-    ],
-    [ // Shorter horizontal platform
-        [1,1,1]
-    ],
-    [ // Slightly staggered horizontal platform
-        [0,1,1,1,0]
-
-    ]
-    
+    [[1,1,1,1,1]],
+    [[1,1,1]],
+    [[0,1,1,1,0]]
 ]
 
 s = function(p){
@@ -124,64 +116,36 @@ s = function(p){
         }
         p.pop();
     }
-    p.keyPressed = function(e){
-        switch (e.code){
-            case('KeyS'):
-            case ('ArrowDown'): 
-                inputs.down = {r:false, p:true, h: true};
-            break;
-            case('KeyA'):
-            case ('ArrowLeft'): 
-                inputs.left = {r:false, p:true, h: true};
-            break;
-            case ('KeyW'):
-            case ('ArrowUp'): 
-                inputs.up = {r:false, p:true, h: true};
-            break;
-            case ('KeyD'):
-            case ('ArrowRight'): 
-                inputs.right = {r:false, p:true, h: true};
-            break;
-            case ('KeyZ'):
-            case ('Space'): 
-                inputs.jump = {r:false, p:true, h: true};
-            break;
-            case ('ShiftLeft'): 
-            case ('ShiftRight'):
-            case ('KeyX'): 
-                inputs.act = {r:false, p:true, h: true};
-            break;
-        }
+    const keyMap = {
+    KeyS: 'down',
+    ArrowDown: 'down',
+    KeyA: 'left',
+    ArrowLeft: 'left',
+    KeyW: 'up',
+    ArrowUp: 'up',
+    KeyD: 'right',
+    ArrowRight: 'right',
+    KeyZ: 'jump',
+    Space: 'jump',
+    ShiftLeft: 'act',
+    ShiftRight: 'act',
+    KeyX: 'act'
+};
+
+p.keyPressed = function(e) {
+    const action = keyMap[e.code];
+    if (action) {
+        inputs[action] = { r: false, p: true, h: true };
     }
-    p.keyReleased = function(e){
-        switch (e.code){
-            case('KeyS'):
-            case ('ArrowDown'): 
-                inputs.down = {r:true, p:false, h: false};
-            break;
-            case('KeyA'):
-            case ('ArrowLeft'): 
-                inputs.left = {r:true, p:false, h: false};
-            break;
-            case ('KeyW'):
-            case ('ArrowUp'): 
-                inputs.up = {r:true, p:false, h: false};
-            break;
-            case ('KeyD'):
-            case ('ArrowRight'): 
-                inputs.right = {r:true, p:false, h: false};
-            break;
-            case ('KeyZ'):
-            case ('Space'): 
-                inputs.jump = {r:true, p:false, h: false};
-            break;
-            case ('ShiftLeft'): 
-            case ('ShiftRight'):
-            case ('KeyX'): 
-                inputs.act = {r:true, p:false, h: false};
-            break;
-        }
+}
+
+p.keyReleased = function(e) {
+    const action = keyMap[e.code];
+    if (action) {
+        inputs[action] = { r: true, p: false, h: false };
     }
+}
+
 
     p.generatePlatforms = function() {
         for (let y = 0; y < p.height/p.tileSize; y++) {
