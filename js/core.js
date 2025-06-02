@@ -10,16 +10,17 @@ inputs = {
 }
 
 platformAreas = [
-    [
-        [0,0,0],
-        [1,1,1],
-        [0,0,0],
+    [ // Wide horizontal platform
+        [1,1,1,1,1]
     ],
-    [
-        [0,1,0],
-        [0,1,0],
-        [0,1,0],
+    [ // Shorter horizontal platform
+        [1,1,1]
+    ],
+    [ // Slightly staggered horizontal platform
+        [0,1,1,1,0]
+
     ]
+    
 ]
 
 s = function(p){
@@ -64,6 +65,20 @@ s = function(p){
         p.platforms = [];
         p.tileSize = 40;
         p.generatePlatforms();
+        p.generatePlatforms();
+
+        let button = document.getElementById("randomizeBtn");
+        button.addEventListener("click", () => {
+            AllColliders = []; // clear colliders
+            p.generatePlatforms(); // regenerate platforms
+        
+            // reset player to ground
+            p.player.col.setPosition(0,10); // Adjust X/Y as needed
+            p.player.col.setVelocity(0,0); // Stop any falling motion
+            p.player.state = "idle"; // Reset state so animations work as expected
+        
+});
+
     }
     p.draw = function(){
         p.background(125);
@@ -192,6 +207,18 @@ s = function(p){
             p.platforms[y][p.worldWidth/p.tileSize - 1] = 1;
             new COLLIDER(p.tileSize, p.tileSize, (p.worldWidth/p.tileSize - 1)*p.tileSize, y*p.tileSize+18);
         }
+        // Fill bottom row with solid tiles and colliders
+        let bottomRow = Math.floor(p.height / p.tileSize) - 1;
+        for (let x = 0; x < p.worldWidth / p.tileSize; x++) {
+            p.platforms[bottomRow][x] = 1;
+            new COLLIDER(
+                p.tileSize,
+                p.tileSize,
+                x * p.tileSize,
+                bottomRow * p.tileSize + 18
+            );
+        }
+
         console.log(p.platforms)
     }
 
