@@ -57,7 +57,7 @@ s = function(p){
         p.player.anim.fallDw.push(p.player.anim.runDw.at(0)); 
         //debug floor and platforms
         p.floor = new COLLIDER(p.width,32,0,p.height-32);
-        p.floor = new COLLIDER(400,32,200,p.height-236);
+        //p.floor = new COLLIDER(400,32,200,p.height-236);
         p.randomSeed()
         p.platforms = [];
         p.tileSize = 40;

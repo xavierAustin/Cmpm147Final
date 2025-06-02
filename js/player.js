@@ -1,5 +1,5 @@
 class PLAYER{
-    constructor(p, images = {}, x = 0, y = 0, w = 40, h = 96, bbx = 44, bby = 32){
+    constructor(p, images = {}, x = 0, y = 0, w = 30, h = 70, bbx = 49, bby = 58){
         if (Object.keys(images).length == 0)
             console.log("Player has no frame data.");
         this.p = p;
