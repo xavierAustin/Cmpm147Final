@@ -1,5 +1,21 @@
 const COLLIDERDEBUG = true;
 
+const KEYMMAP = {
+    KeyS: 'down',
+    ArrowDown: 'down',
+    KeyA: 'left',
+    ArrowLeft: 'left',
+    KeyW: 'up',
+    ArrowUp: 'up',
+    KeyD: 'right',
+    ArrowRight: 'right',
+    KeyZ: 'jump',
+    Space: 'jump',
+    ShiftLeft: 'act',
+    ShiftRight: 'act',
+    KeyX: 'act'
+};
+
 inputs = {
     jump: {r:false,p:false,h:false},
     act: {r:false,p:false,h:false},
@@ -10,9 +26,9 @@ inputs = {
 }
 
 platformAreas = [
-    [[1,1,1,1,1]],
-    [[1,1,1]],
-    [[0,1,1,1,0]]
+    [[1,1,1,1,1]], // Wide horizontal platform
+    [[1,1,1]], // Shorter horizontal platform
+    [[0,1,1,1,0]] // slightly staggered horizontal platform
 ]
 
 s = function(p){
@@ -66,13 +82,11 @@ s = function(p){
         button.addEventListener("click", () => {
             AllColliders = []; // clear colliders
             p.generatePlatforms(); // regenerate platforms
-        
             // reset player to ground
             p.player.col.setPosition(0,10); // Adjust X/Y as needed
             p.player.col.setVelocity(0,0); // Stop any falling motion
             p.player.state = "idle"; // Reset state so animations work as expected
-        
-});
+        });
 
     }
     p.draw = function(){
@@ -116,35 +130,20 @@ s = function(p){
         }
         p.pop();
     }
-    const keyMap = {
-    KeyS: 'down',
-    ArrowDown: 'down',
-    KeyA: 'left',
-    ArrowLeft: 'left',
-    KeyW: 'up',
-    ArrowUp: 'up',
-    KeyD: 'right',
-    ArrowRight: 'right',
-    KeyZ: 'jump',
-    Space: 'jump',
-    ShiftLeft: 'act',
-    ShiftRight: 'act',
-    KeyX: 'act'
-};
 
-p.keyPressed = function(e) {
-    const action = keyMap[e.code];
-    if (action) {
-        inputs[action] = { r: false, p: true, h: true };
+    p.keyPressed = function(e) {
+        const action = KEYMMAP[e.code];
+        if (action) {
+            inputs[action] = { r: false, p: true, h: true };
+        }
     }
-}
 
-p.keyReleased = function(e) {
-    const action = keyMap[e.code];
-    if (action) {
-        inputs[action] = { r: true, p: false, h: false };
+    p.keyReleased = function(e) {
+        const action = KEYMMAP[e.code];
+        if (action) {
+            inputs[action] = { r: true, p: false, h: false };
+        }
     }
-}
 
 
     p.generatePlatforms = function() {
