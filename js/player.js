@@ -13,6 +13,7 @@ class PLAYER{
         this.facing = 1;
         this.sleepTimer = 0;
         this.grapple = null;
+        this.BBinfo = {w:w,h:h,BBx:bbx,BBy:bby,hHalf:h/2};
     }
     update(){
         let x = this.col.getPosition("x");
@@ -21,7 +22,8 @@ class PLAYER{
         let _dy = this.col.getVelocity("y") / 4;
         let move = (inputs.right.h-inputs.left.h) * 1.4;
         let aim = (inputs.down.h-inputs.up.h);
-        this.jumpBuffer -= Math.max(this.jumpBuffer - 1, 0);
+        this.jumpBuffer = Math.max(this.jumpBuffer - 1, 0);
+        console.log(this.jumpBuffer);
         //6 frames buffer (if you press jump early youll jump whenever possible)
         if (inputs.jump.p)
             this.jumpBuffer = 6;
@@ -29,6 +31,8 @@ class PLAYER{
             default:
                 _dx /= 5;
                 _dy = 1.5;
+                if (inputs.act.h)
+                    this.state = "crouch";
                 if (this.jumpBuffer){
                     _dy = -2.7;
                     this.state = "jump";
@@ -42,6 +46,8 @@ class PLAYER{
             case "run":
                 _dx = (move+_dx*4)/5;
                 _dy = 1.5;
+                if (inputs.act.h)
+                    this.state = "crawl";
                 if (this.jumpBuffer){
                     _dy = -3.2;
                     this.state = "jump";
@@ -59,6 +65,8 @@ class PLAYER{
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.17-0.1*(_dy > -1 && inputs.jump.h);
+                if (inputs.act.h)
+                    this.state = "crouch";
                 if (_dy > 1)
                     this.state = "fall";
                 else if (move == 0 && this.col.meeting(x,y+2))
@@ -70,18 +78,57 @@ class PLAYER{
                 this.ctjump = 0;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.25;
+                if (inputs.act.h)
+                    this.state = "crouch";
                 if (move == 0 && (_dy > 0) && this.col.meeting(x,y+2))
                     this.state = "idle";
                 else if (this.col.meeting(x,y+2) && (_dy > 0))
+                    this.state = "run";
+            break;
+            case "crouch":
+                _dy += 0.25;
+                _dx = (move + _dx*8)/9;
+                if (move != 0 && this.col.meeting(x,y+2))
+                    this.state = "crawl";
+                if (this.jumpBuffer && this.col.meeting(x,y+2))
+                    _dy = -2.7;
+                this.ctjump = 0;
+                this.jumpBuffer = 0;
+                this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
+                if (inputs.act.h || this.col.meeting(x,y-this.BBinfo.hHalf))
+                    break;
+                this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
+                if (move == 0)
+                    this.state = "idle";
+                else
+                    this.state = "run";
+            break;
+            case "crawl":
+                _dx = (move+_dx*4)/7;
+                _dy = 1.5;
+                if (move == 0 || !this.col.meeting(x,y+2))
+                    this.state = "crouch";
+                if (this.jumpBuffer){
+                    this.state = "crouch";
+                    _dy = -2.7;
+                    this.jumpBuffer = 0;
+                }
+                this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
+                if (inputs.act.h || this.col.meeting(x,y-this.BBinfo.hHalf))
+                    break;
+                this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
+                if (move == 0)
+                    this.state = "idle";
+                else
                     this.state = "run";
             break;
         }
         //handle animations
         this.anim_index = (this.anim_index + 0.33);
         this.anim_current = this.state;
-        if (aim == 1)
+        if (aim == 1 && this.state != "crawl" && this.state != "crouch")
             this.anim_current += "Dw";
-        if (aim == -1)
+        if (aim == -1 && this.state != "crawl" && this.state != "crouch")
             this.anim_current += "Up";
         if (move != 0)
             this.facing = Math.sign(move);
