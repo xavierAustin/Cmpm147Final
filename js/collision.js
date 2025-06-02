@@ -23,6 +23,12 @@ class COLLIDER{
         }
         AllColliders.push(this);
     }
+    destroy(){
+        for (let i = 0; i < AllColliders.length; i ++){
+            if (AllColliders[i] == this)
+                AllColliders.splice(i,1);
+        }
+    }
     addListener(eventStr, action){
         if (this.eventListenersX.indexOf(action) < -1 && this.eventListenersY.indexOf(action) < -1){
             console.log("Ignoring attempt to add dupicate event listener. Using this method expecting calls like this to be ignored is ill-advised.");

@@ -12,6 +12,7 @@ class PLAYER{
         this.anim_current = "idle";
         this.facing = 1;
         this.sleepTimer = 0;
+        this.grapple = null;
     }
     update(){
         let x = this.col.getPosition("x");
@@ -19,6 +20,7 @@ class PLAYER{
         let _dx = this.col.getVelocity("x") / 4;
         let _dy = this.col.getVelocity("y") / 4;
         let move = (inputs.right.h-inputs.left.h) * 1.4;
+        let aim = (inputs.down.h-inputs.up.h);
         this.jumpBuffer -= Math.max(this.jumpBuffer - 1, 0);
         //6 frames buffer (if you press jump early youll jump whenever possible)
         if (inputs.jump.p)
@@ -28,7 +30,7 @@ class PLAYER{
                 _dx /= 5;
                 _dy = 1.5;
                 if (this.jumpBuffer){
-                    _dy = -3.7;
+                    _dy = -2.7;
                     this.state = "jump";
                 }else if (move != 0)
                     this.state = "run";
@@ -41,7 +43,7 @@ class PLAYER{
                 _dx = (move+_dx*4)/5;
                 _dy = 1.5;
                 if (this.jumpBuffer){
-                    _dy = -4.2;
+                    _dy = -3.2;
                     this.state = "jump";
                 }else if (!this.col.meeting(x,y+2))
                     this.ctjump ++;
@@ -68,18 +70,18 @@ class PLAYER{
                 this.ctjump = 0;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.25;
-                if (move == 0 && this.col.meeting(x,y+2))
+                if (move == 0 && (_dy > 0) && this.col.meeting(x,y+2))
                     this.state = "idle";
-                else if (this.col.meeting(x,y+2))
+                else if (this.col.meeting(x,y+2) && (_dy > 0))
                     this.state = "run";
             break;
         }
         //handle animations
         this.anim_index = (this.anim_index + 0.33);
         this.anim_current = this.state;
-        if (inputs.down.h && !inputs.up.h)
+        if (aim == 1)
             this.anim_current += "Dw";
-        if (!inputs.down.h && inputs.up.h)
+        if (aim == -1)
             this.anim_current += "Up";
         if (move != 0)
             this.facing = Math.sign(move);
@@ -89,9 +91,27 @@ class PLAYER{
             this.anim_current = "sleep";
         else if (this.p.frameCount - this.sleepTimer > 900)
             this.anim_current = "sit";
-        //handle collision
-        this.col.setVelocity(_dx * 4, _dy * 4);
+        //handle collision (also set terminal velocity)
+        this.col.setVelocity(_dx * 4, Math.min(_dy, 6) * 4);
         this.col.update();
+        //grappling hook :))
+        //grapple class assumes player has access to p5js context!
+        //grapple class assumes this.anim has "grapple" property!
+        if (this.grapple != null){
+            this.grapple.draw();
+            this.grapple = this.grapple.update();
+        }else if (false){//(inputs.act.p){
+            //slightly nudge based on movement; 1/4 dx and dy applied
+            this.grapple = new GRAPPLE(
+                this,
+                x - 32 + 128 * (this.facing == 1),
+                y,
+                _dx + this.facing * (5 - Math.abs(aim * 3)),
+                _dy + (aim == 1) * 12 - 8 - (aim == -1) * 3,
+                64,
+                64
+            );
+        }
     }
     draw(){
         this.p.push();
