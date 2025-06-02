@@ -23,7 +23,7 @@ class PLAYER{
         let move = (inputs.right.h-inputs.left.h) * 1.4;
         let aim = (inputs.down.h-inputs.up.h);
         this.jumpBuffer = Math.max(this.jumpBuffer - 1, 0);
-        console.log(this.jumpBuffer);
+        //console.log(this.jumpBuffer);
         //6 frames buffer (if you press jump early youll jump whenever possible)
         if (inputs.jump.p)
             this.jumpBuffer = 6;
