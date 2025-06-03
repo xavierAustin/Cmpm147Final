@@ -32,9 +32,8 @@ platformAreas = [
 ]
 
 s = function(p){
-    p.preload = function(){
-        
-    }
+    let enemy;
+    p.preload = function(){}
     p.setup = function(){
         p.createCanvas(1080,810).parent("canvasContainer");
         //if we're using pixel art this'd be a good idea
@@ -62,6 +61,7 @@ s = function(p){
             sleep: [p.loadImage('./assets/player/sleep.png')],
             grapple: p.loadImage('./assets/player/grapple.png')
         });
+        p.enemy = new ENEMY(p, 500, p.height - 32 - 40, 40);
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
         p.player.anim.jump.push(p.player.anim.run.at(-1));
         p.player.anim.jumpUp.push(p.player.anim.runUp.at(-1));
@@ -112,6 +112,7 @@ s = function(p){
         }
         //draw player
         p.player.draw();
+        p.enemy.draw();
         //draw stuff
 
         //update inputs such that pressed and released only occur for the frame they are pressed/released
