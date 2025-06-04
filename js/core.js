@@ -1,4 +1,4 @@
-const COLLIDERDEBUG = true;
+const COLLIDERDEBUG = false;
 let basePlatformTile;
 
 const KEYMMAP = {
@@ -35,16 +35,7 @@ platformAreas = [
 s = function(p){
     p.preload = function(){
         basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
-    }
-    p.setup = function(){
-        p.createCanvas(1080,810).parent("canvasContainer");
-        //if we're using pixel art this'd be a good idea
-        p.select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
-        //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
-        window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
-        p.cameraOffset = 0;
-        p.worldWidth = p.width * 2; // Set world width to 2x window width
-        p.player = new PLAYER(p, {
+        p.playerSprites = {
             idle: [p.loadImage('./assets/player/idle.png')],
             idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
             idleDw: [p.loadImage('./assets/player/idle_lookdown.png')],
@@ -62,33 +53,43 @@ s = function(p){
             sit: [p.loadImage('./assets/player/sit.png')],
             sleep: [p.loadImage('./assets/player/sleep.png')],
             grapple: p.loadImage('./assets/player/grapple.png')
-        });
+        };
         //box sprite
-        p.loadImage('./assets/box.png');
+        p.box = p.loadImage('./assets/box.png');
+    }
+    p.setup = function(){
+        p.createCanvas(1080,810).parent("canvasContainer");
+        //if we're using pixel art this'd be a good idea
+        p.select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
+        //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
+        window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
+        p.cameraOffset = 0;
+        p.worldWidth = p.width * 2; // Set world width to 2x window width
+        
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
-        p.player.anim.jump.push(p.player.anim.run.at(-1));
-        p.player.anim.jumpUp.push(p.player.anim.runUp.at(-1));
-        p.player.anim.jumpDw.push(p.player.anim.runDw.at(-1));
-        p.player.anim.fall.push(p.player.anim.run.at(0));
-        p.player.anim.fallUp.push(p.player.anim.runUp.at(0));
-        p.player.anim.fallDw.push(p.player.anim.runDw.at(0));
+        p.playerSprites.jump.push(p.playerSprites.run.at(-1));
+        p.playerSprites.jumpUp.push(p.playerSprites.runUp.at(-1));
+        p.playerSprites.jumpDw.push(p.playerSprites.runDw.at(-1));
+        p.playerSprites.fall.push(p.playerSprites.run.at(0));
+        p.playerSprites.fallUp.push(p.playerSprites.runUp.at(0));
+        p.playerSprites.fallDw.push(p.playerSprites.runDw.at(0));
+        //create player
+        p.player = new PLAYER(p, p.playerSprites);
 
         //debug floor and platforms
         p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
-        p.randomSeed()
+        p.randomSeed();
         p.platforms = [];
         p.tileSize = 40;
         p.generatePlatforms();
 
         let button = document.getElementById("randomizeBtn");
         button.addEventListener("click", () => {
-            AllColliders = []; // clear colliders
+            AllColliders = []; // clear colliders (dangerous!)
             p.generatePlatforms(); // regenerate platforms
             // reset player to ground
-            p.player.col.setPosition(0,10); // Adjust X/Y as needed
-            p.player.col.setVelocity(0,0); // Stop any falling motion
-            p.player.state = "idle"; // Reset state so animations work as expected
+            p.player = new PLAYER(p, p.playerSprites); //respawn player
         });
 
     }
