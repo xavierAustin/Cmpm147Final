@@ -65,15 +65,6 @@ s = function(p){
         });
         //box sprite
         p.loadImage('./assets/box.png');
-    }
-    p.setup = function(){
-        p.createCanvas(1080,810).parent("canvasContainer");
-        //if we're using pixel art this'd be a good idea
-        p.select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
-        //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
-        window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
-        p.cameraOffset = 0;
-        p.worldWidth = p.width * 2; // Set world width to 2x window width
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
         p.player.anim.jump.push(p.player.anim.run.at(-1));
