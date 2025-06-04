@@ -1,4 +1,5 @@
 const COLLIDERDEBUG = true;
+let basePlatformTile;
 
 const KEYMMAP = {
     KeyS: 'down',
@@ -33,7 +34,7 @@ platformAreas = [
 
 s = function(p){
     p.preload = function(){
-        
+        basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
     }
     p.setup = function(){
         p.createCanvas(1080,810).parent("canvasContainer");
@@ -76,7 +77,6 @@ s = function(p){
         p.platforms = [];
         p.tileSize = 40;
         p.generatePlatforms();
-        p.generatePlatforms();
 
         let button = document.getElementById("randomizeBtn");
         button.addEventListener("click", () => {
@@ -91,7 +91,7 @@ s = function(p){
     }
     p.draw = function(){
         p.background(125);
-        
+
         // Update camera position to follow player
         let targetOffset = p.player.col.getPosition("x") - p.width/2;
         p.cameraOffset = p.lerp(p.cameraOffset, targetOffset, 0.1);
@@ -124,7 +124,7 @@ s = function(p){
         for (let y = 0; y < p.height/p.tileSize; y++) {
             for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (p.platforms[y][x] == 1) {
-                    p.rect(x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                    p.image(basePlatformTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 }
             }
         }
