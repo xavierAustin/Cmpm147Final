@@ -98,7 +98,9 @@ class PLAYER{
                 if (inputs.act.h || this.col.meeting(x,y-this.BBinfo.hHalf))
                     break;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
-                if (move == 0)
+                if (!this.col.meeting(x,y+2))
+                    this.state = "fall";
+                else if (move == 0)
                     this.state = "idle";
                 else
                     this.state = "run";
