@@ -94,9 +94,17 @@ s = function(p){
     }
 
     p.preload = function(){
-        p.backgroundImage = p.loadImage('./assets/background.png');
+        //p.backgroundImage = p.loadImage('./assets/background.png');
         p.basePlatformTile = p.loadImage('./assets/baseplatformtilesmall.png');
         p.bigPlatformTile = p.loadImage('./assets/BasePlatformTile.png');
+        //basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
+        p.forestBackground1 = p.loadImage('./assets/forestBackground1.png')
+        p.forestBackground2 = p.loadImage('./assets/forestBackground2.png')
+        p.hillsBackground = p.loadImage('./assets/hillsBackground1.png')
+        p.mountainBackground1 = p.loadImage('./assets/mountainBackground1.png')
+        p.mountainBackground2 = p.loadImage('./assets/mountainBackground2.png')
+        p.cloudsBackground = p.loadImage('./assets/cloudsBackground.png')
+
         p.playerSprites = {
             idle: [p.loadImage('./assets/player/idle.png')],
             idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
@@ -131,6 +139,7 @@ s = function(p){
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
         p.cameraOffset = 0;
         p.worldWidth = p.width * 2; // Set world width to 2x window width
+        p.worldWidth = p.width * 8;
         
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
@@ -170,6 +179,31 @@ s = function(p){
         let button = document.getElementById("randomizeBtn");
         button.addEventListener("click", p.reset);
 
+        /*
+        forest1Layer = p.createGraphics(p.width, p.height);
+        forest1Layer.noSmooth()
+        forest1Layer.image(forestBackground1, 0, 0, p.width, p.height);
+
+        forest2Layer = p.createGraphics(p.width, p.height);
+        forest2Layer.noSmooth()
+        forest2Layer.image(forestBackground2, 0, 0, p.width, p.height);
+
+        hillsLayer = p.createGraphics(p.width, p.height);
+        hillsLayer.noSmooth()
+        hillsLayer.image(hillsBackground, 0, 0, p.width, p.height);
+
+        mountain1Layer = p.createGraphics(p.width, p.height);
+        mountain1Layer.noSmooth()
+        mountain1Layer.image(mountainBackground1, 0, 0, p.width, p.height);
+
+        mountain2Layer = p.createGraphics(p.width, p.height);
+        mountain2Layer.noSmooth()
+        mountain2Layer.image(mountainBackground2, 0, 0, p.width, p.height);
+
+        cloudsLayer = p.createGraphics(p.width, p.height);
+        cloudsLayer.noSmooth()
+        cloudsLayer.image(cloudsBackground, 0, 0, p.width, p.height);
+        */
     }
 
     p.reset = function(){
@@ -218,7 +252,8 @@ s = function(p){
         }
 
         //draw background
-        p.image(p.backgroundImage,0,0,p.width,p.height)
+        //p.image(p.backgroundImage,0,0,p.width,p.height)
+        parallaxBackground(p)
         //draw background
         p.image(p.bigPlatformTile,0,0,p.tileSize*2,p.tileSize*2)
 
@@ -260,6 +295,7 @@ s = function(p){
         p.textSize(24);
         p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}\nScore: ${p.score}`, 20, 30);
         p.pop();
+        console.log(p.deltaTime)
     }
 
     p.keyPressed = function(e) {
@@ -275,7 +311,6 @@ s = function(p){
             inputs[action] = { r: true, p: false, h: false };
         }
     }
-
 
     p.generatePlatforms = function() {
         for (let y = 0; y < p.height/p.tileSize; y++) {
