@@ -1,5 +1,5 @@
 class TILE{
-    constructor(x,y,image){
+    constructor(x,y,image,screenCoords = false){
 
     }
     draw(){

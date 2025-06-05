@@ -96,6 +96,7 @@ s = function(p){
     p.preload = function(){
         p.backgroundImage = p.loadImage('./assets/background.png');
         p.basePlatformTile = p.loadImage('./assets/baseplatformtilesmall.png');
+        p.bigPlatformTile = p.loadImage('./assets/BasePlatformTile.png');
         p.playerSprites = {
             idle: [p.loadImage('./assets/player/idle.png')],
             idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
@@ -196,60 +197,40 @@ s = function(p){
     }
 
     p.draw = function(){
-        //p.background(125);
-        //draw background
-        p.image(p.backgroundImage,0,0,p.width,p.height)
-
         // Update camera position to follow player
         let targetOffset = p.player.col.getPosition("x") - p.width/2;
         p.cameraOffset = p.lerp(p.cameraOffset, targetOffset, 0.1);
         
         // Clamp camera offset to world bounds
         p.cameraOffset = p.constrain(p.cameraOffset, 0, p.worldWidth - p.width);
-        
-        //move the camera around player position
-        p.push();
-        p.translate(-p.cameraOffset, 0);
-        
+
         //update player
         p.player.update();
-
-        //update key
-        for (let k of p.keys) {
-            k.update();
-        }
 
         //update door (open when key collected)
         p.door.update();
 
-        //check for win: if door is open and player overlaps it
-        if (p.door.open) {
-            const playerCol = p.player.col;
-            const px0 = playerCol.x + playerCol.xBB;
-            const py0 = playerCol.y + playerCol.yBB;
-            const pw  = playerCol.w;
-            const ph  = playerCol.h;
-
-            const dx0 = p.door.x;
-            const dy0 = p.door.y;
-            const dw  = p.tileSize;
-            const dh  = p.tileSize;
-
-            if (
-                px0 < dx0 + dw &&
-                px0 + pw > dx0 &&
-                py0 < dy0 + dh &&
-                py0 + ph > dy0
-            ) {
-                p.score ++;
-                p.reset();
-            }
+        //update inputs such that pressed and released only occur for the frame they are pressed/released
+        let keys = Object.getOwnPropertyNames(inputs);
+        for (let i = 0; i < keys.length; i++){
+            inputs[keys[i]].p = false;
+            inputs[keys[i]].r = false;
         }
+
+        //draw background
+        p.image(p.backgroundImage,0,0,p.width,p.height)
+        //draw background
+        p.image(p.bigPlatformTile,0,0,p.tileSize*2,p.tileSize*2)
+
+        //move the camera around player position
+        p.push();
+        p.translate(-p.cameraOffset, 0);
 
         //debug colision draw
         for (let i = 0; i < COLLIDERDEBUG * AllColliders.length; i ++){
             p.rect(AllColliders[i].x+AllColliders[i].xBB,AllColliders[i].y+AllColliders[i].yBB,AllColliders[i].w,AllColliders[i].h)
         }
+
         //draw player
         p.player.draw();
 
@@ -261,12 +242,7 @@ s = function(p){
         //draw door
         p.door.draw();
 
-        //update inputs such that pressed and released only occur for the frame they are pressed/released
-        let keys = Object.getOwnPropertyNames(inputs);
-        for (let i = 0; i < keys.length; i++){
-            inputs[keys[i]].p = false;
-            inputs[keys[i]].r = false;
-        }
+        //draw tiles
         for (let y = 0; y < p.height/p.tileSize; y++) {
             for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (p.platforms[y][x] == 1) {
@@ -274,6 +250,7 @@ s = function(p){
                 }
             }
         }
+    
         p.pop();
 
         // Draw HUD: always at top-left of canvas

@@ -15,6 +15,7 @@ class COLLIDER{
         this.xBB = xBB;
         this.yBB = yBB;
         this.percision = percision;
+        this.phantom = false;
         this.eventListenersX = [];
         this.eventListenersY = [];
         if (terminateVelOnCollision){
@@ -22,6 +23,12 @@ class COLLIDER{
             this.addListener("y", () => {this.dy = 0});
         }
         AllColliders.push(this);
+    }
+    setIsPhantom(bool){
+        this.phantom = bool;
+    }
+    getIsPhantom(){
+        return this.phantom;
     }
     destroy(){
         for (let i = 0; i < AllColliders.length; i ++){
@@ -62,6 +69,16 @@ class COLLIDER{
         else
             throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
     }
+    dispatchEvent(eventStr){
+        if (eventStr == "x")
+            for (let i = 0; i < this.eventListenersX.length; i++)
+                this.eventListenersX[i]();
+        else if (eventStr == "y")
+            for (let i = 0; i < this.eventListenersY.length; i++)
+                this.eventListenersY[i]();
+        else
+            throw new Error("\""+eventStr+"\" is not a valid event to dispatch.");
+    }
     getListeners(eventStr){
         if (eventStr == "x")
             return this.eventListenersX;
@@ -71,7 +88,7 @@ class COLLIDER{
             throw new Error("\""+eventStr+"\" is not a valid event to listen for.");
     }
     getAllProperies(){
-        return {x:this.x, y:this.y, w:this.x, h:this.y, dx:this.dx, dy:this.dy, xBB:this.xBB, yBB:this.yBB, percision: this.percision, eventListeners: this.eventListenersX, eventListenersY: this.eventListenersY};
+        return {x:this.x, y:this.y, w:this.x, h:this.y, dx:this.dx, dy:this.dy, xBB:this.xBB, yBB:this.yBB, percision: this.percision, phantom: this.phantom, eventListeners: this.eventListenersX, eventListenersY: this.eventListenersY};
     }
     getPosition(string = ""){
         switch (string){
@@ -150,31 +167,38 @@ class COLLIDER{
             let xb1 = xb0+temp.w;
             let yb1 = yb0+temp.h;
             if (xa1 >= xb0 && xa0 <= xb1 && ya1 >= yb0 && ya0 <= yb1){
-                return true;
+                return AllColliders[i];
             }
         }
-        return false;
+        return null;
     }
     update(){
         let _dx = this.dx;
         let _dy = this.dy;
         let temp = 0;
+        let object = null;
 
         while ((_dx != 0 || _dy != 0)){
             temp = clamp(_dx,-1,1);
-            if (!this.meeting(this.x+temp,this.y)){
+            object = this.meeting(this.x+temp,this.y);
+            if (!object){
                 this.x += temp;
+            }else if (object.getIsPhantom()){
+                object.dispatchEvent("x");
             }else{
-                for (let i = 0; i < this.eventListenersX.length; i++)
-                    this.eventListenersX[i]();
+                this.dispatchEvent("x");
+                object.dispatchEvent("x");
             }
             _dx = (_dx - temp);
             temp = clamp(_dy,-1,1);
-            if (!this.meeting(this.x,this.y+temp)){
+            object = this.meeting(this.x,this.y+temp);
+            if (!object){
                 this.y += temp;
+            }else if (object.getIsPhantom()){
+                object.dispatchEvent("y");
             }else{
-                for (let i = 0; i < this.eventListenersY.length; i++)
-                    this.eventListenersY[i]();
+                this.dispatchEvent("y");
+                object.dispatchEvent("y");
             }
             _dy = (_dy - temp);
         }
