@@ -1,5 +1,11 @@
 const COLLIDERDEBUG = false;
 let basePlatformTile;
+let forestBackground1;
+let forestBackground2;
+let hillsBackground;
+let mountainBackground1;
+let mountainBackground2;
+let cloudsBackground;
 
 const KEYMMAP = {
     KeyS: 'down',
@@ -35,6 +41,13 @@ platformAreas = [
 s = function(p){
     p.preload = function(){
         basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
+        forestBackground1 = p.loadImage('./assets/forestBackground1.png')
+        forestBackground2 = p.loadImage('./assets/forestBackground2.png')
+        hillsBackground = p.loadImage('./assets/hillsBackground1.png')
+        mountainBackground1 = p.loadImage('./assets/mountainBackground1.png')
+        mountainBackground2 = p.loadImage('./assets/mountainBackground2.png')
+        cloudsBackground = p.loadImage('./assets/cloudsBackground.png')
+
         p.playerSprites = {
             idle: [p.loadImage('./assets/player/idle.png')],
             idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
@@ -65,6 +78,7 @@ s = function(p){
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
         p.cameraOffset = 0;
         p.worldWidth = p.width * 2; // Set world width to 2x window width
+        p.worldWidth = p.width * 8;
         
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
@@ -92,9 +106,33 @@ s = function(p){
             p.player = new PLAYER(p, p.playerSprites); //respawn player
         });
 
+        
+        forest1Layer = p.createGraphics(p.width, p.height);
+        forest1Layer.noSmooth()
+        forest1Layer.image(forestBackground1, 0, 0, p.width, p.height);
+
+        forest2Layer = p.createGraphics(p.width, p.height);
+        forest2Layer.noSmooth()
+        forest2Layer.image(forestBackground2, 0, 0, p.width, p.height);
+
+        hillsLayer = p.createGraphics(p.width, p.height);
+        hillsLayer.noSmooth()
+        hillsLayer.image(hillsBackground, 0, 0, p.width, p.height);
+
+        mountain1Layer = p.createGraphics(p.width, p.height);
+        mountain1Layer.noSmooth()
+        mountain1Layer.image(mountainBackground1, 0, 0, p.width, p.height);
+
+        mountain2Layer = p.createGraphics(p.width, p.height);
+        mountain2Layer.noSmooth()
+        mountain2Layer.image(mountainBackground2, 0, 0, p.width, p.height);
+
+        cloudsLayer = p.createGraphics(p.width, p.height);
+        cloudsLayer.noSmooth()
+        cloudsLayer.image(cloudsBackground, 0, 0, p.width, p.height);
     }
     p.draw = function(){
-        p.background(125);
+        p.parallaxBackground()
 
         // Update camera position to follow player
         let targetOffset = p.player.col.getPosition("x") - p.width/2;
@@ -133,6 +171,7 @@ s = function(p){
             }
         }
         p.pop();
+        console.log(p.deltaTime)
     }
 
     p.keyPressed = function(e) {
@@ -147,6 +186,31 @@ s = function(p){
         if (action) {
             inputs[action] = { r: true, p: false, h: false };
         }
+    }
+
+    p.parallaxBackground = function() {
+        
+        let baseParallax = 3
+        p.background(31,148,192,255);
+        p.image(cloudsLayer,(-p.cameraOffset/(baseParallax+3))%p.width,0)
+        p.image(cloudsLayer,(-p.cameraOffset/(baseParallax+3))%p.width + p.width,0)
+
+        p.image(mountain2Layer,(-p.cameraOffset/(baseParallax+2))%p.width,-50)
+        p.image(mountain2Layer,(-p.cameraOffset/(baseParallax+2))%p.width + p.width,-50)
+        /*
+
+        p.image(mountain1Layer,(-p.cameraOffset/(baseParallax+3))%p.width,0)
+        p.image(mountain1Layer,(-p.cameraOffset/(baseParallax+3))%p.width + p.width,0)
+
+        p.image(hillsLayer,(-p.cameraOffset/(baseParallax+2))%p.width,0)
+        p.image(hillsLayer,(-p.cameraOffset/(baseParallax+2))%p.width + p.width,0)*/
+        
+        p.image(forest2Layer,(-p.cameraOffset/(baseParallax+1))%p.width,-30)
+        p.image(forest2Layer,(-p.cameraOffset/(baseParallax+1))%p.width + p.width,-30)
+
+        p.image(forest1Layer,(-p.cameraOffset/baseParallax)%p.width,0)
+        p.image(forest1Layer,(-p.cameraOffset/baseParallax)%p.width + p.width,0)
+
     }
 
 
