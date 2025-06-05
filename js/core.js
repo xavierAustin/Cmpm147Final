@@ -96,6 +96,7 @@ s = function(p){
     p.preload = function(){
         //p.backgroundImage = p.loadImage('./assets/background.png');
         p.basePlatformTile = p.loadImage('./assets/baseplatformtilesmall.png');
+        p.dirtTile = p.loadImage('./assets/DirtTile2.png');
         p.bigPlatformTile = p.loadImage('./assets/BasePlatformTile.png');
         //basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
         p.forestBackground1 = p.loadImage('./assets/forestBackground1.png')
@@ -139,7 +140,6 @@ s = function(p){
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
         p.cameraOffset = 0;
         p.worldWidth = p.width * 2; // Set world width to 2x window width
-        p.worldWidth = p.width * 8;
         
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
@@ -182,25 +182,25 @@ s = function(p){
         /*
         forest1Layer = p.createGraphics(p.width, p.height);
         forest1Layer.noSmooth()
-        forest1Layer.image(forestBackground1, 0, 0, p.width, p.height);
+        forest1Layer.image(forestBackground1, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        forest2Layer = p.createGraphics(p.width, p.height);
+        forest2Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         forest2Layer.noSmooth()
-        forest2Layer.image(forestBackground2, 0, 0, p.width, p.height);
+        forest2Layer.image(forestBackground2, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        hillsLayer = p.createGraphics(p.width, p.height);
+        hillsLayer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         hillsLayer.noSmooth()
-        hillsLayer.image(hillsBackground, 0, 0, p.width, p.height);
+        hillsLayer.image(hillsBackground, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        mountain1Layer = p.createGraphics(p.width, p.height);
+        mountain1Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         mountain1Layer.noSmooth()
-        mountain1Layer.image(mountainBackground1, 0, 0, p.width, p.height);
+        mountain1Layer.image(mountainBackground1, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        mountain2Layer = p.createGraphics(p.width, p.height);
+        mountain2Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         mountain2Layer.noSmooth()
-        mountain2Layer.image(mountainBackground2, 0, 0, p.width, p.height);
+        mountain2Layer.image(mountainBackground2, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        cloudsLayer = p.createGraphics(p.width, p.height);
+        cloudsLayer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         cloudsLayer.noSmooth()
         cloudsLayer.image(cloudsBackground, 0, 0, p.width, p.height);
         */
@@ -281,6 +281,8 @@ s = function(p){
             for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (p.platforms[y][x] == 1) {
                     p.image(p.basePlatformTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                } else if (p.platforms[y][x] == 2) {
+                    p.image(p.dirtTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 }
             }
         }
@@ -341,7 +343,7 @@ s = function(p){
         // Fill bottom row with solid tiles and colliders
         let bottomRow = Math.floor(p.height / p.tileSize) - 1;
         for (let x = 0; x < p.worldWidth / p.tileSize; x++) {
-            p.platforms[bottomRow][x] = 1;
+            p.platforms[bottomRow][x] = 2;
             new COLLIDER(
                 p.tileSize,
                 p.tileSize,
