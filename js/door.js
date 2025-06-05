@@ -20,7 +20,7 @@ class Door {
 
     draw() {
         const img = this.open ? this.imgOpen : this.imgClosed;
-        this.p.image(img, this.x, this.y, this.tileSize, this.tileSize);
+        this.p.image(img, this.x, this.y, this.tileSize*2, this.tileSize*2);
     }
 }
 
@@ -64,6 +64,6 @@ class Key {
 
     draw() {
         if (this.collected) return;
-        this.p.image(this.img, this.x, this.y, this.w, this.h);
+        this.p.image(this.img, this.x, this.y, this.w*2, this.h*2);
     }
 }

@@ -146,7 +146,7 @@ s = function(p){
         p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
         p.randomSeed();
         p.platforms = [];
-        p.tileSize = 40;
+        p.tileSize = 64;
         p.generatePlatforms();
 
         // Ensure no platform spawns on or above the door column
