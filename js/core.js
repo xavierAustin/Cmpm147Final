@@ -1,5 +1,4 @@
 const COLLIDERDEBUG = false;
-let basePlatformTile;
 
 const KEYMMAP = {
     KeyS: 'down',
@@ -29,12 +28,13 @@ inputs = {
 platformAreas = [
     [[1,1,1,1,1]], // Wide horizontal platform
     [[1,1,1]], // Shorter horizontal platform
-    [[0,1,1,1,0]] // slightly staggered horizontal platform
+    [[0,1,1,1,0]], // slightly staggered horizontal platform
+    [[1,0,0,0,1]]
 ]
 
 s = function(p){
     p.preload = function(){
-        basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
+        p.basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
         p.playerSprites = {
             idle: [p.loadImage('./assets/player/idle.png')],
             idleUp: [p.loadImage('./assets/player/idle_lookup.png')],
@@ -103,6 +103,7 @@ s = function(p){
         // Clamp camera offset to world bounds
         p.cameraOffset = p.constrain(p.cameraOffset, 0, p.worldWidth - p.width);
         
+        //move the camera around player position
         p.push();
         p.translate(-p.cameraOffset, 0);
         
@@ -128,7 +129,7 @@ s = function(p){
         for (let y = 0; y < p.height/p.tileSize; y++) {
             for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (p.platforms[y][x] == 1) {
-                    p.image(basePlatformTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                    p.image(p.basePlatformTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 }
             }
         }
