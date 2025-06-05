@@ -95,7 +95,7 @@ s = function(p){
 
     p.preload = function(){
         //p.backgroundImage = p.loadImage('./assets/background.png');
-        p.basePlatformTile = p.loadImage('./assets/baseplatformtilesmall.png');
+        p.basePlatformTiles = [p.loadImage('./assets/baseplatformtilesmall.png'),p.loadImage('./assets/platformtilesmallrocky.png')];
         p.dirtTile = p.loadImage('./assets/DirtTile2.png');
         p.bigPlatformTile = p.loadImage('./assets/BasePlatformTile.png');
         //basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
@@ -277,10 +277,14 @@ s = function(p){
         p.door.draw();
 
         //draw tiles
+        p.randomSeed(10);
         for (let y = 0; y < p.height/p.tileSize; y++) {
             for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (p.platforms[y][x] == 1) {
-                    p.image(p.basePlatformTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                    //let index = XXH.h32(Math.floor(y+x*p.height),0) % 2
+                    let index = p.random(p.basePlatformTiles);
+                    //console.log(index==0);
+                    p.image(index, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 } else if (p.platforms[y][x] == 2) {
                     p.image(p.dirtTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 }
