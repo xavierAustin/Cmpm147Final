@@ -254,8 +254,7 @@ s = function(p){
         //draw background
         //p.image(p.backgroundImage,0,0,p.width,p.height)
         parallaxBackground(p)
-        //draw background
-        p.image(p.bigPlatformTile,0,0,p.tileSize*2,p.tileSize*2)
+        //p.image(p.bigPlatformTile,0,0,p.tileSize*2,p.tileSize*2)
 
         //move the camera around player position
         p.push();
@@ -295,7 +294,7 @@ s = function(p){
         p.textSize(24);
         p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}\nScore: ${p.score}`, 20, 30);
         p.pop();
-        console.log(p.deltaTime)
+        //console.log(p.deltaTime)
     }
 
     p.keyPressed = function(e) {
