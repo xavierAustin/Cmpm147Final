@@ -1,11 +1,13 @@
 const COLLIDERDEBUG = false;
 let basePlatformTile;
+let dirtTile;
 let forestBackground1;
 let forestBackground2;
 let hillsBackground;
 let mountainBackground1;
 let mountainBackground2;
 let cloudsBackground;
+let backgroundShrinkage = 1.2;
 
 const KEYMMAP = {
     KeyS: 'down',
@@ -40,7 +42,8 @@ platformAreas = [
 
 s = function(p){
     p.preload = function(){
-        basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
+        basePlatformTile = p.loadImage('./assets/BasePlatformTile2.png')
+        dirtTile = p.loadImage('./assets/DirtTile3.png')
         forestBackground1 = p.loadImage('./assets/forestBackground1.png')
         forestBackground2 = p.loadImage('./assets/forestBackground2.png')
         hillsBackground = p.loadImage('./assets/hillsBackground1.png')
@@ -78,7 +81,6 @@ s = function(p){
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
         p.cameraOffset = 0;
         p.worldWidth = p.width * 2; // Set world width to 2x window width
-        p.worldWidth = p.width * 8;
         
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
@@ -107,29 +109,29 @@ s = function(p){
         });
 
         
-        forest1Layer = p.createGraphics(p.width, p.height);
+        forest1Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         forest1Layer.noSmooth()
-        forest1Layer.image(forestBackground1, 0, 0, p.width, p.height);
+        forest1Layer.image(forestBackground1, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        forest2Layer = p.createGraphics(p.width, p.height);
+        forest2Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         forest2Layer.noSmooth()
-        forest2Layer.image(forestBackground2, 0, 0, p.width, p.height);
+        forest2Layer.image(forestBackground2, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        hillsLayer = p.createGraphics(p.width, p.height);
+        hillsLayer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         hillsLayer.noSmooth()
-        hillsLayer.image(hillsBackground, 0, 0, p.width, p.height);
+        hillsLayer.image(hillsBackground, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        mountain1Layer = p.createGraphics(p.width, p.height);
+        mountain1Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         mountain1Layer.noSmooth()
-        mountain1Layer.image(mountainBackground1, 0, 0, p.width, p.height);
+        mountain1Layer.image(mountainBackground1, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        mountain2Layer = p.createGraphics(p.width, p.height);
+        mountain2Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         mountain2Layer.noSmooth()
-        mountain2Layer.image(mountainBackground2, 0, 0, p.width, p.height);
+        mountain2Layer.image(mountainBackground2, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
-        cloudsLayer = p.createGraphics(p.width, p.height);
+        cloudsLayer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         cloudsLayer.noSmooth()
-        cloudsLayer.image(cloudsBackground, 0, 0, p.width, p.height);
+        cloudsLayer.image(cloudsBackground, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
     }
     p.draw = function(){
         p.parallaxBackground()
@@ -167,6 +169,8 @@ s = function(p){
             for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (p.platforms[y][x] == 1) {
                     p.image(basePlatformTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                } else if (p.platforms[y][x] == 2) {
+                    p.image(dirtTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 }
             }
         }
@@ -192,25 +196,20 @@ s = function(p){
         
         let baseParallax = 3
         p.background(31,148,192,255);
-        p.image(cloudsLayer,(-p.cameraOffset/(baseParallax+3))%p.width,0)
-        p.image(cloudsLayer,(-p.cameraOffset/(baseParallax+3))%p.width + p.width,0)
+        p.backgroundLayer(cloudsLayer, baseParallax+3, -150)
+        p.backgroundLayer(mountain2Layer, baseParallax+2, 0)
+        //p.backgroundLayer(mountain1Layer, baseParallax+3, 0)
+        //p.backgroundLayer(hillsLayer, baseParallax+2, 0)
+        p.backgroundLayer(forest2Layer, baseParallax+1, -30)
+        p.backgroundLayer(forest1Layer, baseParallax, -10)
+    }
 
-        p.image(mountain2Layer,(-p.cameraOffset/(baseParallax+2))%p.width,-50)
-        p.image(mountain2Layer,(-p.cameraOffset/(baseParallax+2))%p.width + p.width,-50)
-        /*
-
-        p.image(mountain1Layer,(-p.cameraOffset/(baseParallax+3))%p.width,0)
-        p.image(mountain1Layer,(-p.cameraOffset/(baseParallax+3))%p.width + p.width,0)
-
-        p.image(hillsLayer,(-p.cameraOffset/(baseParallax+2))%p.width,0)
-        p.image(hillsLayer,(-p.cameraOffset/(baseParallax+2))%p.width + p.width,0)*/
-        
-        p.image(forest2Layer,(-p.cameraOffset/(baseParallax+1))%p.width,-30)
-        p.image(forest2Layer,(-p.cameraOffset/(baseParallax+1))%p.width + p.width,-30)
-
-        p.image(forest1Layer,(-p.cameraOffset/baseParallax)%p.width,0)
-        p.image(forest1Layer,(-p.cameraOffset/baseParallax)%p.width + p.width,0)
-
+    p.backgroundLayer = function(layer, parallax, yOffset) {
+        if (layer) {
+            for(let i = 0; i < p.ceil(backgroundShrinkage) + 1; i++) {
+                p.image(layer,(-p.cameraOffset/(parallax))%p.width + ((p.width/backgroundShrinkage) * i),yOffset + (p.height * ((backgroundShrinkage-1)/backgroundShrinkage)))
+            }
+        }
     }
 
 
@@ -244,7 +243,7 @@ s = function(p){
         // Fill bottom row with solid tiles and colliders
         let bottomRow = Math.floor(p.height / p.tileSize) - 1;
         for (let x = 0; x < p.worldWidth / p.tileSize; x++) {
-            p.platforms[bottomRow][x] = 1;
+            p.platforms[bottomRow][x] = 2;
             new COLLIDER(
                 p.tileSize,
                 p.tileSize,
