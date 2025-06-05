@@ -31,7 +31,7 @@ class COLLIDER{
     }
     addListener(eventStr, action){
         if (this.eventListenersX.indexOf(action) < -1 && this.eventListenersY.indexOf(action) < -1){
-            console.log("Ignoring attempt to add dupicate event listener. Using this method expecting calls like this to be ignored is ill-advised.");
+            console.warn("Ignoring attempt to add dupicate event listener. Using this method expecting calls like this to be ignored is ill-advised.");
             return;
         }
         if (eventStr == "x")
@@ -44,7 +44,7 @@ class COLLIDER{
     removeListener(eventStr, action){
         let temp = Math.max(this.eventListenersX.indexOf(action), this.eventListenersY.indexOf(action));
         if (temp == -1){
-            console.log("Ignoring attempt to remove untracked event listener. Using this method expecting calls like this to be ignored is ill-advised.");
+            console.warn("Ignoring attempt to remove untracked event listener. Using this method expecting calls like this to be ignored is ill-advised.");
             return;
         }
         if (eventStr == "x")

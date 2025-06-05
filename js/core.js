@@ -94,7 +94,7 @@ s = function(p){
     }
 
     p.preload = function(){
-        p.background = p.loadImage('./assets/background.png');
+        p.backgroundImage = p.loadImage('./assets/background.png');
         p.basePlatformTile = p.loadImage('./assets/baseplatformtilesmall.png');
         p.playerSprites = {
             idle: [p.loadImage('./assets/player/idle.png')],
@@ -157,6 +157,7 @@ s = function(p){
         p.keysCollected = 0;
         p.keys = [];
         p.spawnKeys();
+        p.score = 0;
 
         // Set up the door one tile left of far-right
         const bottomRow = Math.floor(p.height / p.tileSize) - 1;
@@ -164,37 +165,40 @@ s = function(p){
         const doorY = bottomRow * p.tileSize + 18 - p.tileSize;
         p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
 
-        p.gameWon = false;
 
         let button = document.getElementById("randomizeBtn");
-        button.addEventListener("click", () => {
-            AllColliders = []; // clear colliders (dangerous!)
-            p.generatePlatforms(); // regenerate platforms
-
-            // Clear any platform under/above door again
-            p.clearDoorArea();
-
-            // reset player to ground
-            p.player = new PLAYER(p, p.playerSprites); //respawn player
-            // reset keys
-            p.keysCollected = 0;
-            p.keys = [];
-            p.spawnKeys();
-
-            // reset door
-            if (p.door && p.door.col) {
-                try { p.door.col.destroy(); } catch(e) {}
-            }
-            const br = Math.floor(p.height / p.tileSize) - 1;
-            const dX = p.worldWidth - 2 * p.tileSize;
-            const dY = br * p.tileSize + 18 - p.tileSize;
-            p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
-        });
+        button.addEventListener("click", p.reset);
 
     }
 
+    p.reset = function(){
+        AllColliders = []; // clear colliders (dangerous!)
+        p.generatePlatforms(); // regenerate platforms
+
+        // Clear any platform under/above door again
+        p.clearDoorArea();
+
+        // reset player to ground
+        p.player = new PLAYER(p, p.playerSprites); //respawn player
+        // reset keys
+        p.keysCollected = 0;
+        p.keys = [];
+        p.spawnKeys();
+
+        // reset door
+        if (p.door && p.door.col) {
+            try { p.door.col.destroy(); } catch(e) {}
+        }
+        const br = Math.floor(p.height / p.tileSize) - 1;
+        const dX = p.worldWidth - 2 * p.tileSize;
+        const dY = br * p.tileSize + 18 - p.tileSize;
+        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
+    }
+
     p.draw = function(){
-        p.background(125);
+        //p.background(125);
+        //draw background
+        p.image(p.backgroundImage,0,0,p.width,p.height)
 
         // Update camera position to follow player
         let targetOffset = p.player.col.getPosition("x") - p.width/2;
@@ -237,7 +241,8 @@ s = function(p){
                 py0 < dy0 + dh &&
                 py0 + ph > dy0
             ) {
-                p.gameWon = true;
+                p.score ++;
+                p.reset();
             }
         }
 
@@ -276,7 +281,7 @@ s = function(p){
         p.noStroke();
         p.fill(255);
         p.textSize(24);
-        p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}`, 20, 30);
+        p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}\nScore: ${p.score}`, 20, 30);
         p.pop();
     }
 
