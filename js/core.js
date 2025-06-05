@@ -222,7 +222,7 @@ s = function(p){
 
         // reset door
         if (p.door && p.door.col) {
-            try { p.door.col.destroy(); } catch(e) {}
+            p.door.col.destroy();
         }
         const br = Math.floor(p.height / p.tileSize) - 1;
         const dX = p.worldWidth - 2 * p.tileSize;
