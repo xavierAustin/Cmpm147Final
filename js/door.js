@@ -11,7 +11,7 @@ class Door {
         this.state = "closed";
         this.halfTile = TILESIZE/2;
         this.col = new COLLIDER(TILESIZE, TILESIZE*2, x, y, 0, 0, this.halfTile);
-        this.range = new COLLIDER(TILESIZE*4, TILESIZE*4, x-TILESIZE, y-TILESIZE);
+        this.range = new COLLIDER(TILESIZE*6, TILESIZE*6, x-TILESIZE*2, y-TILESIZE*2);
         this.range.setIsPhantom(true);
     }
 
@@ -25,15 +25,22 @@ class Door {
             this.col.addListener("x",temp);
             this.col.addListener("y",temp);
             this.col.setIsPhantom(true);
+            temp = () => {
+                this.state = "open"
+            }
+            this.range.addListener("x",temp);
+            this.range.addListener("y",temp);
         }
+        if (this.state != "closed")
+            this.state = "unlocked";
     }
 
     draw() {
         if (this.state == "open"){
-            this.p.image(this.imgOpen, this.x, this.y, this.size, this.size);
             this.p.noStroke();
-            this.p.fill("hsl(265°, 69%, 94%)");
+            this.p.fill(`hsl(${this.p.frameCount%360}, 85%, 62%)`);
             this.p.rect(this.x+this.halfTile,this.y,TILESIZE, TILESIZE*2);
+            this.p.image(this.imgOpen, this.x, this.y, this.size, this.size);
         }else if (this.state == "closed")
             this.p.image(this.imgClosed, this.x, this.y, this.size, this.size);
         else

@@ -239,11 +239,11 @@ s = function(p){
         // Clamp camera offset to world bounds
         p.cameraOffset = p.constrain(p.cameraOffset, 0, p.worldWidth - p.width);
 
-        //update player
-        p.player.update();
-
         //update door (open when key collected)
         p.door.update();
+
+        //update player
+        p.player.update();
 
         //update inputs such that pressed and released only occur for the frame they are pressed/released
         let keys = Object.getOwnPropertyNames(inputs);

@@ -190,6 +190,8 @@ class COLLIDER{
             }else if (object.getIsPhantom()){
                 object.dispatchEvent("x");
                 this.x += temp;
+            }else if (this.getIsPhantom()){
+                this.dispatchEvent("x");
             }else{
                 this.dispatchEvent("x");
                 object.dispatchEvent("x");
@@ -202,6 +204,8 @@ class COLLIDER{
             }else if (object.getIsPhantom()){
                 object.dispatchEvent("y");
                 this.y += temp;
+            }else if (this.getIsPhantom()){
+                this.dispatchEvent("y");
             }else{
                 this.dispatchEvent("y");
                 object.dispatchEvent("y");
