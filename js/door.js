@@ -1,19 +1,23 @@
 // Door class: blocks player until key is collected, then opens
 class Door {
-    constructor(p, x, y, imgClosed, imgOpen, tileSize) {
+    constructor(p, x, y, imgClosed, imgUnlocked, imgOpen) {
         this.p = p;
         this.x = x;
         this.y = y;
         this.imgClosed = imgClosed;
+        this.imgUnlocked = imgUnlocked;
         this.imgOpen = imgOpen;
-        this.size = tileSize*2;
-        this.open = false;
-        this.col = new COLLIDER(tileSize*2, tileSize*2, x, y);
+        this.size = TILESIZE*2;
+        this.state = "closed";
+        this.halfTile = TILESIZE/2;
+        this.col = new COLLIDER(TILESIZE, TILESIZE*2, x, y, 0, 0, this.halfTile);
+        this.range = new COLLIDER(TILESIZE*4, TILESIZE*4, x-TILESIZE, y-TILESIZE);
+        this.range.setIsPhantom(true);
     }
 
     update() {
-        if (!this.open && this.p.keysCollected >= this.p.totalKeys) {
-            this.open = true;
+        if (this.state == "closed" && this.p.keysCollected >= this.p.totalKeys) {
+            this.state = "unlocked";
             let temp = () => {
                 this.p.score ++;
                 this.p.reset();
@@ -25,21 +29,28 @@ class Door {
     }
 
     draw() {
-        const img = this.open ? this.imgOpen : this.imgClosed;
-        this.p.image(img, this.x, this.y, this.size, this.size);
+        if (this.state == "open"){
+            this.p.image(this.imgOpen, this.x, this.y, this.size, this.size);
+            this.p.noStroke();
+            this.p.fill("hsl(265°, 69%, 94%)");
+            this.p.rect(this.x+this.halfTile,this.y,TILESIZE, TILESIZE*2);
+        }else if (this.state == "closed")
+            this.p.image(this.imgClosed, this.x, this.y, this.size, this.size);
+        else
+            this.p.image(this.imgUnlocked, this.x, this.y, this.size, this.size);
     }
 }
 
 // Key class: handles drawing and overlapping logic for a single key
 class Key {
-    constructor(p, x, y, img, tileSize) {
+    constructor(p, x, y, img) {
         this.p = p;
         this.x = x;
         this.y = y;
         this.img = img;
         this.collected = false;
-        this.size = tileSize*2;
-        this.col = new COLLIDER(tileSize*2,tileSize*2,x,y);
+        this.size = TILESIZE*2;
+        this.col = new COLLIDER(TILESIZE*2,TILESIZE*2,x,y);
         let temp = () => {
             this.collected = true;
             this.p.keysCollected++;

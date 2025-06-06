@@ -131,7 +131,8 @@ s = function(p){
         //box sprite
         p.box = p.loadImage('./assets/box.png');
         p.doorClosedImg = p.loadImage('./assets/closed_door.png');
-        p.doorOpenImg = p.loadImage('./assets/open_door.png');
+        p.doorOpenImg = p.loadImage('./assets/openopen_door.png');
+        p.doorUnlockedImg = p.loadImage('./assets/open_door.png');
     }
     p.setup = function(){
         p.createCanvas(1080,810).parent("canvasContainer");
@@ -173,7 +174,7 @@ s = function(p){
         const bottomRow = Math.floor(p.height / TILESIZE) - 1;
         const doorX = p.worldWidth - 3 * TILESIZE;
         const doorY = bottomRow * TILESIZE + 18 - TILESIZE * 2;
-        p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorOpenImg, TILESIZE);
+        p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
 
 
         let button = document.getElementById("randomizeBtn");
@@ -227,7 +228,7 @@ s = function(p){
         const br = Math.floor(p.height / TILESIZE) - 1;
         const dX = p.worldWidth - 3 * TILESIZE;
         const dY = br * TILESIZE + 18 - TILESIZE * 2;
-        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorOpenImg, TILESIZE);
+        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
     }
 
     p.draw = function(){
