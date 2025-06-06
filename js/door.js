@@ -29,7 +29,6 @@ class Door {
             this.col.setIsPhantom(true);
             temp = () => {
                 this.state = "open"
-                console.log("working");
             }
             this.range.addListener("x",temp);
             this.range.addListener("y",temp);
