@@ -1,4 +1,5 @@
 const COLLIDERDEBUG = false;
+const TILESIZE = 64;
 
 const KEYMMAP = {
     KeyS: 'down',
@@ -36,8 +37,8 @@ s = function(p){
 
     // Remove any platform or collider at the door column (floor and one above)
     p.clearDoorArea = function() {
-        const doorCol = Math.floor(p.worldWidth / p.tileSize) - 2;
-        const bottomRow = Math.floor(p.height / p.tileSize) - 1;
+        const doorCol = Math.floor(p.worldWidth / TILESIZE) - 2;
+        const bottomRow = Math.floor(p.height / TILESIZE) - 1;
 
         // Clear platform grid cells
         if (p.platforms[bottomRow]) {
@@ -48,9 +49,9 @@ s = function(p){
         }
 
         // Pixel coordinates for possible colliders
-        const px = doorCol * p.tileSize;
-        const pyFloor = bottomRow * p.tileSize + 18;
-        const pyAbove = (bottomRow - 1) * p.tileSize + 18;
+        const px = doorCol * TILESIZE;
+        const pyFloor = bottomRow * TILESIZE + 18;
+        const pyAbove = (bottomRow - 1) * TILESIZE + 18;
 
         // Destroy any colliders at those positions
         for (let c of [...AllColliders]) {
@@ -65,8 +66,8 @@ s = function(p){
 
     // Place exactly one key on a valid surface tile
     p.spawnKeys = function() {
-        const rows = Math.floor(p.height / p.tileSize);
-        const cols = Math.floor(p.worldWidth / p.tileSize);
+        const rows = Math.floor(p.height / TILESIZE);
+        const cols = Math.floor(p.worldWidth / TILESIZE);
 
         const candidates = [];
         for (let ty = 1; ty < rows; ty++) {
@@ -87,9 +88,9 @@ s = function(p){
 
         const idx = Math.floor(p.random(0, candidates.length));
         const { tx, ty } = candidates[idx];
-        const keyPx = tx * p.tileSize;
-        const keyPy = ty * p.tileSize + 18 - p.tileSize*2;
-        const newKey = new Key(p, keyPx, keyPy, p.keyImage, p.tileSize);
+        const keyPx = tx * TILESIZE;
+        const keyPy = ty * TILESIZE + 18 - TILESIZE*2;
+        const newKey = new Key(p, keyPx, keyPy, p.keyImage, TILESIZE);
         p.keys.push(newKey);
     }
 
@@ -156,7 +157,6 @@ s = function(p){
         p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
         p.randomSeed();
         p.platforms = [];
-        p.tileSize = 64;
         p.generatePlatforms();
 
         // Ensure no platform spawns on or above the door column
@@ -170,10 +170,10 @@ s = function(p){
         p.score = 0;
 
         // Set up the door one tile left of far-right
-        const bottomRow = Math.floor(p.height / p.tileSize) - 1;
-        const doorX = p.worldWidth - 3 * p.tileSize;
-        const doorY = bottomRow * p.tileSize + 18 - p.tileSize * 2;
-        p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
+        const bottomRow = Math.floor(p.height / TILESIZE) - 1;
+        const doorX = p.worldWidth - 3 * TILESIZE;
+        const doorY = bottomRow * TILESIZE + 18 - TILESIZE * 2;
+        p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorOpenImg, TILESIZE);
 
 
         let button = document.getElementById("randomizeBtn");
@@ -224,10 +224,10 @@ s = function(p){
         if (p.door && p.door.col) {
             p.door.col.destroy();
         }
-        const br = Math.floor(p.height / p.tileSize) - 1;
-        const dX = p.worldWidth - 3 * p.tileSize;
-        const dY = br * p.tileSize + 18 - p.tileSize * 2;
-        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
+        const br = Math.floor(p.height / TILESIZE) - 1;
+        const dX = p.worldWidth - 3 * TILESIZE;
+        const dY = br * TILESIZE + 18 - TILESIZE * 2;
+        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorOpenImg, TILESIZE);
     }
 
     p.draw = function(){
@@ -254,7 +254,7 @@ s = function(p){
         //draw background
         //p.image(p.backgroundImage,0,0,p.width,p.height)
         parallaxBackground(p)
-        //p.image(p.bigPlatformTile,0,0,p.tileSize*2,p.tileSize*2)
+        //p.image(p.bigPlatformTile,0,0,TILESIZE*2,TILESIZE*2)
 
         //move the camera around player position
         p.push();
@@ -278,15 +278,15 @@ s = function(p){
 
         //draw tiles
         p.randomSeed(10);
-        for (let y = 0; y < p.height/p.tileSize; y++) {
-            for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
+        for (let y = 0; y < p.height/TILESIZE; y++) {
+            for (let x = 0; x < p.worldWidth/TILESIZE; x++) {
                 if (p.platforms[y][x] == 1) {
                     //let index = XXH.h32(Math.floor(y+x*p.height),0) % 2
                     let index = p.random(p.basePlatformTiles);
                     //console.log(index==0);
-                    p.image(index, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                    p.image(index, x*TILESIZE, y*TILESIZE+18, TILESIZE, TILESIZE)
                 } else if (p.platforms[y][x] == 2) {
-                    p.image(p.dirtTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                    p.image(p.dirtTile, x*TILESIZE, y*TILESIZE+18, TILESIZE, TILESIZE)
                 }
             }
         }
@@ -318,11 +318,11 @@ s = function(p){
     }
 
     p.generatePlatforms = function() {
-        for (let y = 0; y < p.height/p.tileSize; y++) {
+        for (let y = 0; y < p.height/TILESIZE; y++) {
             p.platforms[y] = []
         }
-        for (let y = 0; y < p.height/p.tileSize; y++) {
-            for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
+        for (let y = 0; y < p.height/TILESIZE; y++) {
+            for (let x = 0; x < p.worldWidth/TILESIZE; x++) {
                 if (x < 5) {
                     p.platforms[y][x] = -1
                 } else if (p.random() < 0.01) {
@@ -335,24 +335,24 @@ s = function(p){
             }
         }
         // Add walls at both ends of the level
-        for (let y = 0; y < p.height/p.tileSize; y++) {
+        for (let y = 0; y < p.height/TILESIZE; y++) {
             // Left wall
             p.platforms[y][0] = 1;
-            new COLLIDER(p.tileSize, p.tileSize, 0, y*p.tileSize+18);
+            new COLLIDER(TILESIZE, TILESIZE, 0, y*TILESIZE+18);
             
             // Right wall
-            p.platforms[y][p.worldWidth/p.tileSize - 1] = 1;
-            new COLLIDER(p.tileSize, p.tileSize, (p.worldWidth/p.tileSize - 1)*p.tileSize, y*p.tileSize+18);
+            p.platforms[y][p.worldWidth/TILESIZE - 1] = 1;
+            new COLLIDER(TILESIZE, TILESIZE, (p.worldWidth/TILESIZE - 1)*TILESIZE, y*TILESIZE+18);
         }
         // Fill bottom row with solid tiles and colliders
-        let bottomRow = Math.floor(p.height / p.tileSize) - 1;
-        for (let x = 0; x < p.worldWidth / p.tileSize; x++) {
+        let bottomRow = Math.floor(p.height / TILESIZE) - 1;
+        for (let x = 0; x < p.worldWidth / TILESIZE; x++) {
             p.platforms[bottomRow][x] = 2;
             new COLLIDER(
-                p.tileSize,
-                p.tileSize,
-                x * p.tileSize,
-                bottomRow * p.tileSize + 18
+                TILESIZE,
+                TILESIZE,
+                x * TILESIZE,
+                bottomRow * TILESIZE + 18
             );
         }
 
@@ -366,7 +366,7 @@ s = function(p){
                 console.log(i,j,platformAreas[subAreaNum][j][i])
                 if (p.platforms[y+j] != undefined && platformAreas[subAreaNum][j][i] != 0) {
                     p.platforms[y+j][x+i] = platformAreas[subAreaNum][j][i]
-                    new COLLIDER(p.tileSize, p.tileSize,(x+i)*p.tileSize, (y+j)*p.tileSize+18);
+                    new COLLIDER(TILESIZE, TILESIZE,(x+i)*TILESIZE, (y+j)*TILESIZE+18);
                 }
             }
         }
