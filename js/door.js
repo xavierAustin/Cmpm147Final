@@ -11,7 +11,9 @@ class Door {
         this.state = "closed";
         this.halfTile = TILESIZE/2;
         this.col = new COLLIDER(TILESIZE, TILESIZE*2, x, y, 0, 0, this.halfTile);
-        this.range = new COLLIDER(TILESIZE*6, TILESIZE*6, x-TILESIZE*2, y-TILESIZE*2);
+        //range will need to be updated to share a position with the colision box if doors ever move
+        //in that case this.range.setPosition(); should be fine this.range.update(); is probably unneeded
+        this.range = new COLLIDER(TILESIZE*6, TILESIZE*6, x, y, 0, 0, -TILESIZE*2, -TILESIZE*2);
         this.range.setIsPhantom(true);
     }
 
@@ -27,6 +29,7 @@ class Door {
             this.col.setIsPhantom(true);
             temp = () => {
                 this.state = "open"
+                console.log("working");
             }
             this.range.addListener("x",temp);
             this.range.addListener("y",temp);
@@ -39,7 +42,7 @@ class Door {
         if (this.state == "open"){
             this.p.noStroke();
             this.p.fill(`hsl(${this.p.frameCount%360}, 85%, 62%)`);
-            this.p.rect(this.x+this.halfTile,this.y,TILESIZE, TILESIZE*2);
+            this.p.rect(this.x+this.halfTile,this.y,TILESIZE, this.size);
             this.p.image(this.imgOpen, this.x, this.y, this.size, this.size);
         }else if (this.state == "closed")
             this.p.image(this.imgClosed, this.x, this.y, this.size, this.size);
@@ -57,7 +60,7 @@ class Key {
         this.img = img;
         this.collected = false;
         this.size = TILESIZE*2;
-        this.col = new COLLIDER(TILESIZE*2,TILESIZE*2,x,y);
+        this.col = new COLLIDER(TILESIZE,TILESIZE,x,y,0,0,TILESIZE/2,TILESIZE/2);
         let temp = () => {
             this.collected = true;
             this.p.keysCollected++;
