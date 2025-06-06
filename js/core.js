@@ -88,7 +88,7 @@ s = function(p){
         const idx = Math.floor(p.random(0, candidates.length));
         const { tx, ty } = candidates[idx];
         const keyPx = tx * p.tileSize;
-        const keyPy = ty * p.tileSize + 18 - p.tileSize;
+        const keyPy = ty * p.tileSize + 18 - p.tileSize*2;
         const newKey = new Key(p, keyPx, keyPy, p.keyImage, p.tileSize);
         p.keys.push(newKey);
     }
@@ -171,8 +171,8 @@ s = function(p){
 
         // Set up the door one tile left of far-right
         const bottomRow = Math.floor(p.height / p.tileSize) - 1;
-        const doorX = p.worldWidth - 2 * p.tileSize;
-        const doorY = bottomRow * p.tileSize + 18 - p.tileSize;
+        const doorX = p.worldWidth - 3 * p.tileSize;
+        const doorY = bottomRow * p.tileSize + 18 - p.tileSize * 2;
         p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
 
 
@@ -225,8 +225,8 @@ s = function(p){
             p.door.col.destroy();
         }
         const br = Math.floor(p.height / p.tileSize) - 1;
-        const dX = p.worldWidth - 2 * p.tileSize;
-        const dY = br * p.tileSize + 18 - p.tileSize;
+        const dX = p.worldWidth - 3 * p.tileSize;
+        const dY = br * p.tileSize + 18 - p.tileSize * 2;
         p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
     }
 
