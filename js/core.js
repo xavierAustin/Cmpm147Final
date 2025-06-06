@@ -1,13 +1,4 @@
 const COLLIDERDEBUG = false;
-let basePlatformTile;
-let dirtTile;
-let forestBackground1;
-let forestBackground2;
-let hillsBackground;
-let mountainBackground1;
-let mountainBackground2;
-let cloudsBackground;
-let backgroundShrinkage = 1.2;
 
 const KEYMMAP = {
     KeyS: 'down',
@@ -37,19 +28,83 @@ inputs = {
 platformAreas = [
     [[1,1,1,1,1]], // Wide horizontal platform
     [[1,1,1]], // Shorter horizontal platform
-    [[0,1,1,1,0]] // slightly staggered horizontal platform
+    [[0,1,1,1,0]], // slightly staggered horizontal platform
+    [[1,0,0,0,1]]
 ]
 
 s = function(p){
+
+    // Remove any platform or collider at the door column (floor and one above)
+    p.clearDoorArea = function() {
+        const doorCol = Math.floor(p.worldWidth / p.tileSize) - 2;
+        const bottomRow = Math.floor(p.height / p.tileSize) - 1;
+
+        // Clear platform grid cells
+        if (p.platforms[bottomRow]) {
+            p.platforms[bottomRow][doorCol] = 0;
+        }
+        if (p.platforms[bottomRow - 1]) {
+            p.platforms[bottomRow - 1][doorCol] = 0;
+        }
+
+        // Pixel coordinates for possible colliders
+        const px = doorCol * p.tileSize;
+        const pyFloor = bottomRow * p.tileSize + 18;
+        const pyAbove = (bottomRow - 1) * p.tileSize + 18;
+
+        // Destroy any colliders at those positions
+        for (let c of [...AllColliders]) {
+            if (
+                (c.x === px && c.y === pyFloor) ||
+                (c.x === px && c.y === pyAbove)
+            ) {
+                c.destroy();
+            }
+        }
+    }
+
+    // Place exactly one key on a valid surface tile
+    p.spawnKeys = function() {
+        const rows = Math.floor(p.height / p.tileSize);
+        const cols = Math.floor(p.worldWidth / p.tileSize);
+
+        const candidates = [];
+        for (let ty = 1; ty < rows; ty++) {
+            for (let tx = 0; tx < cols; tx++) {
+                if (p.platforms[ty][tx] === 1) {
+                    const above = p.platforms[ty - 1][tx];
+                    if (above === 0 || above === null) {
+                        candidates.push({ tx, ty });
+                    }
+                }
+            }
+        }
+
+        if (candidates.length < p.totalKeys) {
+            console.warn("Not enough surface tiles to place keys.");
+            return;
+        }
+
+        const idx = Math.floor(p.random(0, candidates.length));
+        const { tx, ty } = candidates[idx];
+        const keyPx = tx * p.tileSize;
+        const keyPy = ty * p.tileSize + 18 - p.tileSize;
+        const newKey = new Key(p, keyPx, keyPy, p.keyImage, p.tileSize);
+        p.keys.push(newKey);
+    }
+
     p.preload = function(){
-        basePlatformTile = p.loadImage('./assets/BasePlatformTile2.png')
-        dirtTile = p.loadImage('./assets/DirtTile3.png')
-        forestBackground1 = p.loadImage('./assets/forestBackground1.png')
-        forestBackground2 = p.loadImage('./assets/forestBackground2.png')
-        hillsBackground = p.loadImage('./assets/hillsBackground1.png')
-        mountainBackground1 = p.loadImage('./assets/mountainBackground1.png')
-        mountainBackground2 = p.loadImage('./assets/mountainBackground2.png')
-        cloudsBackground = p.loadImage('./assets/cloudsBackground.png')
+        //p.backgroundImage = p.loadImage('./assets/background.png');
+        p.basePlatformTiles = [p.loadImage('./assets/baseplatformtilesmall.png'),p.loadImage('./assets/platformtilesmallrocky.png')];
+        p.dirtTile = p.loadImage('./assets/DirtTile2.png');
+        p.bigPlatformTile = p.loadImage('./assets/BasePlatformTile.png');
+        //basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
+        p.forestBackground1 = p.loadImage('./assets/forestBackground1.png')
+        p.forestBackground2 = p.loadImage('./assets/forestBackground2.png')
+        p.hillsBackground = p.loadImage('./assets/hillsBackground1.png')
+        p.mountainBackground1 = p.loadImage('./assets/mountainBackground1.png')
+        p.mountainBackground2 = p.loadImage('./assets/mountainBackground2.png')
+        p.cloudsBackground = p.loadImage('./assets/cloudsBackground.png')
 
         p.playerSprites = {
             idle: [p.loadImage('./assets/player/idle.png')],
@@ -69,9 +124,13 @@ s = function(p){
             sit: [p.loadImage('./assets/player/sit.png')],
             sleep: [p.loadImage('./assets/player/sleep.png')],
             grapple: p.loadImage('./assets/player/grapple.png')
-        };
+        };        
+        p.keyImage = p.loadImage('./assets/key.png');
+
         //box sprite
         p.box = p.loadImage('./assets/box.png');
+        p.doorClosedImg = p.loadImage('./assets/closed_door.png');
+        p.doorOpenImg = p.loadImage('./assets/open_door.png');
     }
     p.setup = function(){
         p.createCanvas(1080,810).parent("canvasContainer");
@@ -97,19 +156,31 @@ s = function(p){
         p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
         p.randomSeed();
         p.platforms = [];
-        p.tileSize = 40;
+        p.tileSize = 64;
         p.generatePlatforms();
 
-        let button = document.getElementById("randomizeBtn");
-        button.addEventListener("click", () => {
-            AllColliders = []; // clear colliders (dangerous!)
-            p.generatePlatforms(); // regenerate platforms
-            // reset player to ground
-            p.player = new PLAYER(p, p.playerSprites); //respawn player
-        });
+        // Ensure no platform spawns on or above the door column
+        p.clearDoorArea();
 
-        
-        forest1Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
+        // Set up one key
+        p.totalKeys = 1;
+        p.keysCollected = 0;
+        p.keys = [];
+        p.spawnKeys();
+        p.score = 0;
+
+        // Set up the door one tile left of far-right
+        const bottomRow = Math.floor(p.height / p.tileSize) - 1;
+        const doorX = p.worldWidth - 2 * p.tileSize;
+        const doorY = bottomRow * p.tileSize + 18 - p.tileSize;
+        p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
+
+
+        let button = document.getElementById("randomizeBtn");
+        button.addEventListener("click", p.reset);
+
+        /*
+        forest1Layer = p.createGraphics(p.width, p.height);
         forest1Layer.noSmooth()
         forest1Layer.image(forestBackground1, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
 
@@ -131,32 +202,47 @@ s = function(p){
 
         cloudsLayer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
         cloudsLayer.noSmooth()
-        cloudsLayer.image(cloudsBackground, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
+        cloudsLayer.image(cloudsBackground, 0, 0, p.width, p.height);
+        */
     }
-    p.draw = function(){
-        p.parallaxBackground()
 
+    p.reset = function(){
+        AllColliders = []; // clear colliders (dangerous!)
+        p.generatePlatforms(); // regenerate platforms
+
+        // Clear any platform under/above door again
+        p.clearDoorArea();
+
+        // reset player to ground
+        p.player = new PLAYER(p, p.playerSprites); //respawn player
+        // reset keys
+        p.keysCollected = 0;
+        p.keys = [];
+        p.spawnKeys();
+
+        // reset door
+        if (p.door && p.door.col) {
+            p.door.col.destroy();
+        }
+        const br = Math.floor(p.height / p.tileSize) - 1;
+        const dX = p.worldWidth - 2 * p.tileSize;
+        const dY = br * p.tileSize + 18 - p.tileSize;
+        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
+    }
+
+    p.draw = function(){
         // Update camera position to follow player
         let targetOffset = p.player.col.getPosition("x") - p.width/2;
         p.cameraOffset = p.lerp(p.cameraOffset, targetOffset, 0.1);
         
         // Clamp camera offset to world bounds
         p.cameraOffset = p.constrain(p.cameraOffset, 0, p.worldWidth - p.width);
-        
-        p.push();
-        p.translate(-p.cameraOffset, 0);
-        
+
         //update player
         p.player.update();
-        //update stuff
 
-        //debug colision draw
-        for (let i = 0; i < COLLIDERDEBUG * AllColliders.length; i ++){
-            p.rect(AllColliders[i].x+AllColliders[i].xBB,AllColliders[i].y+AllColliders[i].yBB,AllColliders[i].w,AllColliders[i].h)
-        }
-        //draw player
-        p.player.draw();
-        //draw stuff
+        //update door (open when key collected)
+        p.door.update();
 
         //update inputs such that pressed and released only occur for the frame they are pressed/released
         let keys = Object.getOwnPropertyNames(inputs);
@@ -164,18 +250,57 @@ s = function(p){
             inputs[keys[i]].p = false;
             inputs[keys[i]].r = false;
         }
-        p.rect(0,p.height-32, p.worldWidth,32) //floor
+
+        //draw background
+        //p.image(p.backgroundImage,0,0,p.width,p.height)
+        parallaxBackground(p)
+        //p.image(p.bigPlatformTile,0,0,p.tileSize*2,p.tileSize*2)
+
+        //move the camera around player position
+        p.push();
+        p.translate(-p.cameraOffset, 0);
+
+        //debug colision draw
+        for (let i = 0; i < COLLIDERDEBUG * AllColliders.length; i ++){
+            p.rect(AllColliders[i].x+AllColliders[i].xBB,AllColliders[i].y+AllColliders[i].yBB,AllColliders[i].w,AllColliders[i].h)
+        }
+
+        //draw player
+        p.player.draw();
+
+        //draw key
+        for (let k of p.keys) {
+            k.draw();
+        }
+
+        //draw door
+        p.door.draw();
+
+        //draw tiles
+        p.randomSeed(10);
         for (let y = 0; y < p.height/p.tileSize; y++) {
             for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
                 if (p.platforms[y][x] == 1) {
-                    p.image(basePlatformTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                    //let index = XXH.h32(Math.floor(y+x*p.height),0) % 2
+                    let index = p.random(p.basePlatformTiles);
+                    //console.log(index==0);
+                    p.image(index, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 } else if (p.platforms[y][x] == 2) {
-                    p.image(dirtTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
+                    p.image(p.dirtTile, x*p.tileSize, y*p.tileSize+18, p.tileSize, p.tileSize)
                 }
             }
         }
+    
         p.pop();
-        console.log(p.deltaTime)
+
+        // Draw HUD: always at top-left of canvas
+        p.push();
+        p.noStroke();
+        p.fill(255);
+        p.textSize(24);
+        p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}\nScore: ${p.score}`, 20, 30);
+        p.pop();
+        //console.log(p.deltaTime)
     }
 
     p.keyPressed = function(e) {
@@ -191,27 +316,6 @@ s = function(p){
             inputs[action] = { r: true, p: false, h: false };
         }
     }
-
-    p.parallaxBackground = function() {
-        
-        let baseParallax = 3
-        p.background(31,148,192,255);
-        p.backgroundLayer(cloudsLayer, baseParallax+3, -150)
-        p.backgroundLayer(mountain2Layer, baseParallax+2, 0)
-        //p.backgroundLayer(mountain1Layer, baseParallax+3, 0)
-        //p.backgroundLayer(hillsLayer, baseParallax+2, 0)
-        p.backgroundLayer(forest2Layer, baseParallax+1, -30)
-        p.backgroundLayer(forest1Layer, baseParallax, -10)
-    }
-
-    p.backgroundLayer = function(layer, parallax, yOffset) {
-        if (layer) {
-            for(let i = 0; i < p.ceil(backgroundShrinkage) + 1; i++) {
-                p.image(layer,(-p.cameraOffset/(parallax))%p.width + ((p.width/backgroundShrinkage) * i),yOffset + (p.height * ((backgroundShrinkage-1)/backgroundShrinkage)))
-            }
-        }
-    }
-
 
     p.generatePlatforms = function() {
         for (let y = 0; y < p.height/p.tileSize; y++) {
