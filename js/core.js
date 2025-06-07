@@ -141,10 +141,10 @@ s = function(p){
         p.score = 0;
 
         // Set up the door one tile left of far-right
-        const bottomRow = Math.floor(p.height / p.tileSize) - 1;
-        const doorX = p.worldWidth - 3 * p.tileSize;
-        const doorY = bottomRow * p.tileSize + 18 - p.tileSize * 2;
-        p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
+        const bottomRow = Math.floor(p.height / TILESIZE) - 1;
+        const doorX = p.worldWidth - 3 * TILESIZE;
+        const doorY = bottomRow * TILESIZE + 18 - TILESIZE * 2;
+        p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
 
         /*
         forest1Layer = p.createGraphics(p.width, p.height);
