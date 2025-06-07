@@ -63,36 +63,6 @@ s = function(p){
         }
     }
 
-    // Place exactly one key on a valid surface tile
-    p.spawnKeys = function() {
-        const rows = Math.floor(p.height / p.tileSize);
-        const cols = Math.floor(p.worldWidth / p.tileSize);
-
-        const candidates = [];
-        for (let ty = 1; ty < rows; ty++) {
-            for (let tx = 0; tx < cols; tx++) {
-                if (p.platforms[ty][tx] === 1) {
-                    const above = p.platforms[ty - 1][tx];
-                    if (above === 0 || above === null) {
-                        candidates.push({ tx, ty });
-                    }
-                }
-            }
-        }
-
-        if (candidates.length < p.totalKeys) {
-            console.warn("Not enough surface tiles to place keys.");
-            return;
-        }
-
-        const idx = Math.floor(p.random(0, candidates.length));
-        const { tx, ty } = candidates[idx];
-        const keyPx = tx * p.tileSize;
-        const keyPy = ty * p.tileSize + 18 - p.tileSize*2;
-        const newKey = new Key(p, keyPx, keyPy, p.keyImage, p.tileSize);
-        p.keys.push(newKey);
-    }
-
     p.preload = function(){
         //p.backgroundImage = p.loadImage('./assets/background.png');
         p.basePlatformTiles = [p.loadImage('./assets/baseplatformtilesmall.png'),p.loadImage('./assets/platformtilesmallrocky.png')];
@@ -134,13 +104,11 @@ s = function(p){
     }
     p.setup = function(){
         p.createCanvas(1080,810).parent("canvasContainer");
-        //if we're using pixel art this'd be a good idea
         p.select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
         //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
         p.cameraOffset = 0;
         p.worldWidth = p.width * 2; // Set world width to 2x window width
-        
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
         p.playerSprites.jump.push(p.playerSprites.run.at(-1));
@@ -149,18 +117,21 @@ s = function(p){
         p.playerSprites.fall.push(p.playerSprites.run.at(0));
         p.playerSprites.fallUp.push(p.playerSprites.runUp.at(0));
         p.playerSprites.fallDw.push(p.playerSprites.runDw.at(0));
+
+        let button = document.getElementById("randomizeBtn");
+        button.addEventListener("click", p.reset);
+
         //create player
         p.player = new PLAYER(p, p.playerSprites);
 
         //debug floor and platforms
         p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
         p.randomSeed();
-        p.platforms = [];
-        p.tileSize = 64;
-        p.generatePlatforms();
+        //p.platforms = [];
+        //p.generatePlatforms();
 
         // Ensure no platform spawns on or above the door column
-        p.clearDoorArea();
+        //p.clearDoorArea();
 
         // Set up one key
         p.totalKeys = 1;
@@ -174,10 +145,6 @@ s = function(p){
         const doorX = p.worldWidth - 3 * p.tileSize;
         const doorY = bottomRow * p.tileSize + 18 - p.tileSize * 2;
         p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
-
-
-        let button = document.getElementById("randomizeBtn");
-        button.addEventListener("click", p.reset);
 
         /*
         forest1Layer = p.createGraphics(p.width, p.height);
@@ -206,28 +173,54 @@ s = function(p){
         */
     }
 
+    p.spawnKeys = function() {
+        /*const rows = Math.floor(p.height / TILESIZE);
+        const cols = Math.floor(p.worldWidth / TILESIZE);
+
+        const candidates = [];
+        for (let ty = 1; ty < rows; ty++) {
+            for (let tx = 0; tx < cols; tx++) {
+                if (p.platforms[ty][tx] === 1) {
+                    const above = p.platforms[ty - 1][tx];
+                    if (above === 0 || above === null) {
+                        candidates.push({ tx, ty });
+                    }
+                }
+            }
+        }
+
+        if (candidates.length < p.totalKeys) {
+            console.warn("Not enough surface tiles to place keys.");
+            return;
+        }
+
+        const idx = Math.floor(p.random(0, candidates.length));
+        const { tx, ty } = candidates[idx];
+        const keyPx = tx * TILESIZE;
+        const keyPy = ty * TILESIZE + 18 - TILESIZE*2;
+        const newKey = new Key(p, keyPx, keyPy, p.keyImage, TILESIZE);
+        p.keys.push(newKey);*/
+    }
+
     p.reset = function(){
-        AllColliders = []; // clear colliders (dangerous!)
+        AllColliders = []; // clear colliders
         p.generatePlatforms(); // regenerate platforms
 
         // Clear any platform under/above door again
-        p.clearDoorArea();
+        //p.clearDoorArea();
 
         // reset player to ground
         p.player = new PLAYER(p, p.playerSprites); //respawn player
         // reset keys
-        p.keysCollected = 0;
-        p.keys = [];
         p.spawnKeys();
 
         // reset door
-        if (p.door && p.door.col) {
-            p.door.col.destroy();
-        }
-        const br = Math.floor(p.height / p.tileSize) - 1;
-        const dX = p.worldWidth - 3 * p.tileSize;
-        const dY = br * p.tileSize + 18 - p.tileSize * 2;
-        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorOpenImg, p.tileSize);
+        if (p.door) 
+            p.door.reset();
+        const br = Math.floor(p.height / TILESIZE) - 1;
+        const dX = p.worldWidth - 3 * TILESIZE;
+        const dY = br * TILESIZE + 18 - TILESIZE * 2;
+        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
     }
 
     p.draw = function(){
@@ -265,9 +258,6 @@ s = function(p){
             p.rect(AllColliders[i].x+AllColliders[i].xBB,AllColliders[i].y+AllColliders[i].yBB,AllColliders[i].w,AllColliders[i].h)
         }
 
-        //draw player
-        p.player.draw();
-
         //draw key
         for (let k of p.keys) {
             k.draw();
@@ -277,6 +267,10 @@ s = function(p){
         p.door.draw();
 
         //draw tiles
+        for (let i = 0; i < AllTiles.length; i ++){
+            AllTiles[i].draw();
+        }
+        /*
         p.randomSeed(10);
         for (let y = 0; y < p.height/p.tileSize; y++) {
             for (let x = 0; x < p.worldWidth/p.tileSize; x++) {
@@ -290,7 +284,12 @@ s = function(p){
                 }
             }
         }
-    
+        */
+
+        //draw player
+        p.player.draw();
+        
+        //revert from moving based on the camera position
         p.pop();
 
         // Draw HUD: always at top-left of canvas
@@ -316,7 +315,7 @@ s = function(p){
             inputs[action] = { r: true, p: false, h: false };
         }
     }
-
+    /*
     p.generatePlatforms = function() {
         for (let y = 0; y < p.height/p.tileSize; y++) {
             p.platforms[y] = []
@@ -371,6 +370,7 @@ s = function(p){
             }
         }
     }
+    */
 }
 
 var myp5_1 = new p5(s, "container");

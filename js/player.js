@@ -134,7 +134,7 @@ class PLAYER{
             this.anim_current += "Up";
         if (move != 0)
             this.facing = Math.sign(move);
-        if (this.state != "idle")
+        if (this.state != "idle" || aim)
             this.sleepTimer = this.p.frameCount
         else if (this.p.frameCount - this.sleepTimer > 1500)
             this.anim_current = "sleep";
