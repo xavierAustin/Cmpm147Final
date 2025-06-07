@@ -38,7 +38,7 @@ class PLAYER{
                     this.state = "jump";
                 }else if (move != 0)
                     this.state = "run";
-                else if (!this.col.meeting(x,y+2))
+                else if (!this.col.meetingSolid(x,y+2))
                     this.ctjump ++;
                 if (this.ctjump > 3)
                     this.state = "fall";
@@ -51,7 +51,7 @@ class PLAYER{
                 if (this.jumpBuffer){
                     _dy = -3.2;
                     this.state = "jump";
-                }else if (!this.col.meeting(x,y+2))
+                }else if (!this.col.meetingSolid(x,y+2))
                     this.ctjump ++;
                 else if (move == 0)
                     this.state = "idle";
@@ -69,9 +69,9 @@ class PLAYER{
                     this.state = "crouch";
                 if (_dy > 1)
                     this.state = "fall";
-                else if (move == 0 && this.col.meeting(x,y+2))
+                else if (move == 0 && this.col.meetingSolid(x,y+2))
                     this.state = "idle";
-                else if (this.col.meeting(x,y+2))
+                else if (this.col.meetingSolid(x,y+2))
                     this.state = "run";
             break;
             case "fall":
@@ -80,25 +80,25 @@ class PLAYER{
                 _dy += 0.25;
                 if (inputs.act.h)
                     this.state = "crouch";
-                if (move == 0 && (_dy > 0) && this.col.meeting(x,y+2))
+                if (move == 0 && (_dy > 0) && this.col.meetingSolid(x,y+2))
                     this.state = "idle";
-                else if (this.col.meeting(x,y+2) && (_dy > 0))
+                else if (this.col.meetingSolid(x,y+2) && (_dy > 0))
                     this.state = "run";
             break;
             case "crouch":
                 _dy += 0.25;
                 _dx = (move + _dx*8)/9;
-                if (move != 0 && this.col.meeting(x,y+2))
+                if (move != 0 && this.col.meetingSolid(x,y+2))
                     this.state = "crawl";
-                if (this.jumpBuffer && this.col.meeting(x,y+2))
+                if (this.jumpBuffer && this.col.meetingSolid(x,y+2))
                     _dy = -2.7;
                 this.ctjump = 0;
                 this.jumpBuffer = 0;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
-                if (inputs.act.h || this.col.meeting(x,y-this.BBinfo.hHalf))
+                if (inputs.act.h || this.col.meetingSolid(x,y-this.BBinfo.hHalf))
                     break;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
-                if (!this.col.meeting(x,y+2))
+                if (!this.col.meetingSolid(x,y+2))
                     this.state = "fall";
                 else if (move == 0)
                     this.state = "idle";
@@ -108,7 +108,7 @@ class PLAYER{
             case "crawl":
                 _dx = (move+_dx*4)/7;
                 _dy = 1.5;
-                if (move == 0 || !this.col.meeting(x,y+2))
+                if (move == 0 || !this.col.meetingSolid(x,y+2))
                     this.state = "crouch";
                 if (this.jumpBuffer){
                     this.state = "crouch";
@@ -116,7 +116,7 @@ class PLAYER{
                     this.jumpBuffer = 0;
                 }
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
-                if (inputs.act.h || this.col.meeting(x,y-this.BBinfo.hHalf))
+                if (inputs.act.h || this.col.meetingSolid(x,y-this.BBinfo.hHalf))
                     break;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
                 if (move == 0)

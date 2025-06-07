@@ -172,6 +172,10 @@ class COLLIDER{
         }
         return null;
     }
+    meetingSolid(x,y){
+        let obj = this.meeting(x,y);
+        return obj && !obj.getIsPhantom();
+    }
     update(){
         let _dx = this.dx;
         let _dy = this.dy;
@@ -185,6 +189,9 @@ class COLLIDER{
                 this.x += temp;
             }else if (object.getIsPhantom()){
                 object.dispatchEvent("x");
+                this.x += temp;
+            }else if (this.getIsPhantom()){
+                this.dispatchEvent("x");
             }else{
                 this.dispatchEvent("x");
                 object.dispatchEvent("x");
@@ -196,6 +203,9 @@ class COLLIDER{
                 this.y += temp;
             }else if (object.getIsPhantom()){
                 object.dispatchEvent("y");
+                this.y += temp;
+            }else if (this.getIsPhantom()){
+                this.dispatchEvent("y");
             }else{
                 this.dispatchEvent("y");
                 object.dispatchEvent("y");
