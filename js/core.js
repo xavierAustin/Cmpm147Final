@@ -26,13 +26,6 @@ inputs = {
     right: {r:false,p:false,h:false}
 }
 
-platformAreas = [
-    [[1,1,1,1,1]], // Wide horizontal platform
-    [[1,1,1]], // Shorter horizontal platform
-    [[0,1,1,1,0]], // slightly staggered horizontal platform
-    [[1,0,0,0,1]]
-]
-
 s = function(p){
 
     // Remove any platform or collider at the door column (floor and one above)
@@ -65,11 +58,9 @@ s = function(p){
     }
 
     p.preload = function(){
-        //p.backgroundImage = p.loadImage('./assets/background.png');
         p.basePlatformTiles = [p.loadImage('./assets/baseplatformtilesmall.png'),p.loadImage('./assets/platformtilesmallrocky.png')];
         p.dirtTile = p.loadImage('./assets/DirtTile2.png');
         p.bigPlatformTile = p.loadImage('./assets/BasePlatformTile.png');
-        //basePlatformTile = p.loadImage('./assets/BasePlatformTile.png')
         p.forestBackground1 = p.loadImage('./assets/forestBackground1.png')
         p.forestBackground2 = p.loadImage('./assets/forestBackground2.png')
         p.hillsBackground = p.loadImage('./assets/hillsBackground1.png')
@@ -104,13 +95,14 @@ s = function(p){
         p.doorOpenImg = p.loadImage('./assets/openopen_door.png');
         p.doorUnlockedImg = p.loadImage('./assets/open_door.png');
     }
+
     p.setup = function(){
         p.createCanvas(1080,810).parent("canvasContainer");
         p.select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
         //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
         p.cameraOffset = 0;
-        p.worldWidth = p.width * 2; // Set world width to 2x window width
+        p.worldWidth = p.width * 3; // Set world width to 3x window width
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
         p.playerSprites.jump.push(p.playerSprites.run.at(-1));
@@ -260,37 +252,6 @@ s = function(p){
             p.rect(AllColliders[i].x+AllColliders[i].xBB,AllColliders[i].y+AllColliders[i].yBB,AllColliders[i].w,AllColliders[i].h)
         }
 
-        //draw key
-        for (let k of p.keys) {
-            k.draw();
-        }
-
-        //draw door
-        p.door.draw();
-
-        //draw tiles
-        for (let i = 0; i < AllTiles.length; i ++){
-            AllTiles[i].draw();
-        }
-        /*
-        p.randomSeed(10);
-        for (let y = 0; y < p.height/TILESIZE; y++) {
-            for (let x = 0; x < p.worldWidth/TILESIZE; x++) {
-                if (p.platforms[y][x] == 1) {
-                    //let index = XXH.h32(Math.floor(y+x*p.height),0) % 2
-                    let index = p.random(p.basePlatformTiles);
-                    //console.log(index==0);
-                    p.image(index, x*TILESIZE, y*TILESIZE+18, TILESIZE, TILESIZE)
-                } else if (p.platforms[y][x] == 2) {
-                    p.image(p.dirtTile, x*TILESIZE, y*TILESIZE+18, TILESIZE, TILESIZE)
-                }
-            }
-        }
-        */
-
-        //draw player
-        p.player.draw();
-        
         //revert from moving based on the camera position
         p.pop();
 
@@ -317,7 +278,7 @@ s = function(p){
             inputs[action] = { r: true, p: false, h: false };
         }
     }
-    /*
+    
     p.generatePlatforms = function() {
         for (let y = 0; y < p.height/TILESIZE; y++) {
             p.platforms[y] = []
@@ -372,7 +333,6 @@ s = function(p){
             }
         }
     }
-    */
 }
 
 var myp5_1 = new p5(s, "container");
