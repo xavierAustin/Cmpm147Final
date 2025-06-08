@@ -58,8 +58,10 @@ s = function(p){
     }
 
     p.preload = function(){
-        p.basePlatformTiles = [p.loadImage('./assets/baseplatformtilesmall.png'),p.loadImage('./assets/platformtilesmallrocky.png')];
-        p.dirtTile = p.loadImage('./assets/DirtTile2.png');
+        p.tiles = {
+            sml:[p.loadImage('./assets/baseplatformtilesmall.png'),p.loadImage('./assets/platformtilesmallrocky.png'),p.loadImage('./assets/DirtTile2.png')],
+            big:[p.loadImage('./assets/BasePlatformTile.png'),p.loadImage('./assets/DirtTile.png')]
+        };
         p.bigPlatformTile = p.loadImage('./assets/BasePlatformTile.png');
         p.forestBackground1 = p.loadImage('./assets/forestBackground1.png')
         p.forestBackground2 = p.loadImage('./assets/forestBackground2.png')

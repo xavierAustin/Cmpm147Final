@@ -1,6 +1,7 @@
 var AllTiles = [];
-const F = 10; //just for easier readability for the designed regions; stands for filled
+const REPLACE_BIG = 80 //percent chance that 4 tiles are merged into one big tile
 const D_RATIO = 50 //percent of chunks that use designed regions as opposed to generated ones
+const F = 10; //just for easier readability for the designed regions; stands for filled
 // p = percent chance divided by 10 that a space is filled with a tile
 // s = if this region be stacked vertically ontop of another region
 // y0 = y player is expected to be at (the first defined row is y = 1; 0 is atop the whole construction)
@@ -67,15 +68,32 @@ var designedRegions = [
     ]} //smiley face
 ]
 
-class LEVELGEN {
+class LEVEL {
+    constructor(p,possibleimages){
+        AllColliders = []; // clear colliders
+        AllTiles = []; //clear tiles
+
+        // reset player to ground
+        p.player = new PLAYER(p, p.playerSprites); //respawn player
+        // reset keys
+        p.spawnKeys();
+
+        // reset door
+        if (p.door) 
+            p.door.reset();
+        const br = Math.floor(p.height / TILESIZE) - 1;
+        const dX = p.worldWidth - 3 * TILESIZE;
+        const dY = br * TILESIZE + 18 - TILESIZE * 2;
+        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
+    }
     draw(){
         //draw key
-        for (let k of p.keys) {
+        for (let k of this.p.keys) {
             k.draw();
         }
 
         //draw door
-        p.door.draw();
+        this.p.door.draw();
 
         //draw tiles
         for (let i = 0; i < AllTiles.length; i ++){
@@ -83,7 +101,7 @@ class LEVELGEN {
         }
 
         //draw player
-        p.player.draw();
+        this.p.player.draw();
     }
 }
 
@@ -91,17 +109,33 @@ class LEVELGEN {
 //playerYAtChunkStart = yvalue of the floor created within the previous chunk
 class CHUNK {
     constructor(p,xStart,playerYAtChunkStart,possibleimages){
-        this.p = p;
-        this.images = possibleimages;
+        let doGenerate = Math.random()*100 > D_RATIO;
         this.w = Math.floor(Math.random()*20+5)*TILESIZE;
         this.x = xStart;
         this.y = playerYAtChunkStart;
-    }
-    draw(){
-        this.p.image(this.image,this.x,this.y,this.w,this.h);
+        let design = [];
+        for (let y = 0; y < design.length; y++){
+            let temp = [];
+            for (let x = 0; x < design[y].length; x++)
+                temp.push(0);
+            design.push(temp)
+        }
+        for (let y = 0; y < design.length; y++)
+            for (let x = 0; x < design[y].length; x++){
+                if (Math.random()*9 >= design[y][x])
+                    continue;
+                if (design[y+1] && design[y+1][x] && design[y+1][x+1] && design[y][x+1] && (Math.random()*100 < REPLACE_BIG)){
+                    design[y+1][x] = -1;
+                    design[y+1][x+1] = -1;
+                    design[y][x+1] = -1;
+                    temp = new TILE(p,x+this.x,y+this.y,p.random(possibleimages.big));
+                }else
+                    temp = new TILE(p,x+this.x,y+this.y,p.random(possibleimages.big));
+            }
     }
 }
 
+//assumes TILESIZE is equal to 4 divided by the width or the hight of the image
 class TILE{
     constructor(p,x,y,image,screenCoords = false){
         this.p = p;
