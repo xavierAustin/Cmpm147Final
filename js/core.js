@@ -141,6 +141,7 @@ s = function(p){
         p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
 
         /*
+        //
         forest1Layer = p.createGraphics(p.width, p.height);
         forest1Layer.noSmooth()
         forest1Layer.image(forestBackground1, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
@@ -198,7 +199,7 @@ s = function(p){
 
     p.reset = function(){
         AllColliders = []; // clear colliders
-        p.generatePlatforms(); // regenerate platforms
+        //p.generatePlatforms(); // regenerate platforms
 
         // Clear any platform under/above door again
         //p.clearDoorArea();
@@ -278,7 +279,7 @@ s = function(p){
             inputs[action] = { r: true, p: false, h: false };
         }
     }
-    
+
     p.generatePlatforms = function() {
         for (let y = 0; y < p.height/TILESIZE; y++) {
             p.platforms[y] = []
