@@ -1,6 +1,6 @@
 var AllTiles = [];
 const REPLACE_BIG = 80 //percent chance that 4 tiles are merged into one big tile
-const D_RATIO = 50 //percent of chunks that use designed regions as opposed to generated ones
+const D_RATIO = 100 //percent of chunks that use designed regions as opposed to generated ones
 const F = 10; //just for easier readability for the designed regions; stands for filled
 // p = percent chance divided by 10 that a space is filled with a tile
 // s = if this region be stacked vertically ontop of another region
@@ -13,6 +13,12 @@ var designedRegions = [
         [0,0,0,F,F,F],
         [0,0,F,F,F,F]
     ]}, //assending staircase
+    {s: false, y0:3, y1: 0, p: [
+        [0,0,0,0,0,F],
+        [0,0,5,F,5,0],
+        [0,0,0,0,0,0],
+        [0,F,F,5,1,0]
+    ]}, //assending platforms
     {s: false, y0:0, y1: 3, p: [
         [F,5,1,1,0,0],
         [F,F,5,0,0,0],
@@ -26,26 +32,26 @@ var designedRegions = [
     ]}, //descending staircase kinda
     {s: false, y0:7, y1: 5, p: [
         [F,F,F,9,6,F,F,F,F,F,F],
-        [F,F,F,8,1,0,0,0,8,F,F],
+        [F,F,F,8,1,0,0,0,4,F,F],
         [F,3,3,F,F,0,0,0,0,0,F],
         [F,1,1,F,F,F,0,0,0,0,0],
         [F,1,0,0,0,0,9,0,0,0,0],
         [0,0,0,0,0,0,0,0,0,F,F],
         [0,0,0,0,0,0,0,0,0,3,F],
-        [F,F,1,1,1,5,F,8,8,F,F],
+        [F,F,1,1,1,5,F,5,1,F,F],
     ]}, //small cave
     {s: false, y0:10, y1: 4, p: [
         [F,F,F,F,F,F,F,F,F,F,F],
-        [F,F,F,8,3,0,0,0,8,F,F],
+        [F,F,F,8,3,0,0,0,4,F,F],
         [F,1,0,0,0,0,0,0,0,0,0],
-        [9,0,0,0,0,0,F,F,0,0,0],
+        [9,0,0,0,0,0,F,F,0,0,0],//y = 4
         [9,0,0,0,0,0,0,0,0,F,F],
         [F,0,0,F,F,0,0,0,0,0,F],
         [F,0,0,F,F,F,0,0,0,0,9],
         [F,0,0,0,0,0,F,0,0,0,9],
         [0,0,0,0,0,0,0,0,0,F,F],
-        [0,0,0,0,0,0,0,0,0,3,F],
-        [F,F,1,1,1,5,F,8,8,F,F],
+        [0,0,0,0,0,0,0,0,0,3,F],//y = 10
+        [F,F,1,1,1,5,F,5,1,F,F],
     ]}, //cave
     {s: false, y0:10, y1: 0, p: [
         [F,0,0,0,0,F],
@@ -70,21 +76,22 @@ var designedRegions = [
 
 class LEVEL {
     constructor(p,possibleimages){
-        AllColliders = []; // clear colliders
+        AllColliders = []; // clear colliders (for reseting)
         AllTiles = []; //clear tiles
+        this.p = p;
 
-        // reset player to ground
-        p.player = new PLAYER(p, p.playerSprites); //respawn player
-        // reset keys
+        p.player = new PLAYER(p, p.playerSprites);
+
         p.spawnKeys();
-
-        // reset door
+        /*
         if (p.door) 
             p.door.reset();
         const br = Math.floor(p.height / TILESIZE) - 1;
         const dX = p.worldWidth - 3 * TILESIZE;
         const dY = br * TILESIZE + 18 - TILESIZE * 2;
         p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
+        */
+        this.debug = new CHUNK(p,0,0,possibleimages)
     }
     draw(){
         //draw key
@@ -109,33 +116,47 @@ class LEVEL {
 //playerYAtChunkStart = yvalue of the floor created within the previous chunk
 class CHUNK {
     constructor(p,xStart,playerYAtChunkStart,possibleimages){
-        let doGenerate = Math.random()*100 > D_RATIO;
-        this.w = Math.floor(Math.random()*20+5)*TILESIZE;
         this.x = xStart;
-        this.y = playerYAtChunkStart;
+        this.startY = playerYAtChunkStart;
+        this.tiles = [];
         let design = [];
-        for (let y = 0; y < design.length; y++){
-            let temp = [];
-            for (let x = 0; x < design[y].length; x++)
-                temp.push(0);
-            design.push(temp)
+        let doGenerate = Math.random()*100 > D_RATIO;
+        if (doGenerate){
+            this.w = Math.floor(Math.random()*20+5)*TILESIZE;
+            this.h = Math.floor(Math.random()*20+5)*TILESIZE;
+            for (let y = 0; y < this.h; y++){
+                let temp = [];
+                for (let x = 0; x < this.w; x++)
+                    temp.push(0);
+                design.push(temp)
+            }
+            //generate somn interesting
+        }else{
+            design = (p.random(designedRegions))["p"].slice();
+            console.log(p.random(designedRegions).p.slice());
+            this.w = design[0].length;
+            this.h = design.length;
         }
-        for (let y = 0; y < design.length; y++)
-            for (let x = 0; x < design[y].length; x++){
+        for (let y = 0; y < this.h; y++){
+            for (let x = 0; x < this.w; x++){
                 if (Math.random()*9 >= design[y][x])
                     continue;
                 if (design[y+1] && design[y+1][x] && design[y+1][x+1] && design[y][x+1] && (Math.random()*100 < REPLACE_BIG)){
                     design[y+1][x] = -1;
                     design[y+1][x+1] = -1;
                     design[y][x+1] = -1;
-                    temp = new TILE(p,x+this.x,y+this.y,p.random(possibleimages.big));
-                }else
-                    temp = new TILE(p,x+this.x,y+this.y,p.random(possibleimages.big));
+                    new TILE(p,x+this.x,y+this.startY,p.random(possibleimages.big));
+                }else{
+                    new TILE(p,x+this.x,y+this.startY,p.random(possibleimages.sml));
+                    console.log("?")
+                }
             }
+        }
     }
 }
 
 //assumes TILESIZE is equal to 4 divided by the width or the hight of the image
+//works fine if this is not the case but will likely not be aligned with the grid and may generate holes in the level geometry
 class TILE{
     constructor(p,x,y,image,screenCoords = false){
         this.p = p;

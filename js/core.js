@@ -1,4 +1,4 @@
-const COLLIDERDEBUG = false;
+const COLLIDERDEBUG = true;
 const TILESIZE = 64;
 
 const KEYMMAP = {
@@ -118,7 +118,8 @@ s = function(p){
         button.addEventListener("click", p.reset);
 
         //create player
-        p.player = new PLAYER(p, p.playerSprites);
+        //p.player = new PLAYER(p, p.playerSprites);
+        p.level = new LEVEL(p,p.tiles);
 
         //debug floor and platforms
         p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
@@ -200,24 +201,25 @@ s = function(p){
     }
 
     p.reset = function(){
-        AllColliders = []; // clear colliders
+        p.level = new LEVEL(p,p.tiles);
+        //AllColliders = []; // clear colliders
         //p.generatePlatforms(); // regenerate platforms
 
         // Clear any platform under/above door again
         //p.clearDoorArea();
 
         // reset player to ground
-        p.player = new PLAYER(p, p.playerSprites); //respawn player
+        //p.player = new PLAYER(p, p.playerSprites); //respawn player
         // reset keys
-        p.spawnKeys();
+        //p.spawnKeys();
 
         // reset door
-        if (p.door) 
-            p.door.reset();
-        const br = Math.floor(p.height / TILESIZE) - 1;
-        const dX = p.worldWidth - 3 * TILESIZE;
-        const dY = br * TILESIZE + 18 - TILESIZE * 2;
-        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
+        //if (p.door) 
+        //    p.door.reset();
+        //const br = Math.floor(p.height / TILESIZE) - 1;
+        //const dX = p.worldWidth - 3 * TILESIZE;
+        //const dY = br * TILESIZE + 18 - TILESIZE * 2;
+        //p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
     }
 
     p.draw = function(){
@@ -251,9 +253,15 @@ s = function(p){
         p.translate(-p.cameraOffset, 0);
 
         //debug colision draw
+        p.push();
+        p.fill(255,255,255,50)
         for (let i = 0; i < COLLIDERDEBUG * AllColliders.length; i ++){
             p.rect(AllColliders[i].x+AllColliders[i].xBB,AllColliders[i].y+AllColliders[i].yBB,AllColliders[i].w,AllColliders[i].h)
         }
+        p.pop();
+
+        //draw stuff in the level (player, doors, keys, tiles, etc)
+        p.level.draw();
 
         //revert from moving based on the camera position
         p.pop();
