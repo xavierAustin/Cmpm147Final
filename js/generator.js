@@ -1,27 +1,37 @@
 var AllTiles = [];
 const REPLACE_BIG = 50 //percent chance that 4 tiles are merged into one big tile
 const PLATFORM_SIZE = 7; //number of tiles that make up a generated platform
-const D_RATIO = 0 //percent of chunks that use designed regions as opposed to generated ones
+const D_RATIO = 50 //percent of chunks that use designed regions as opposed to generated ones
 const F = 10; //just for easier readability for the designed regions; stands for filled
 // p = percent chance divided by 10 that a space is filled with a tile
 // y0 = y player is expected to be at (the first defined row is y = 1; 0 is atop the whole construction)
 // y1 = y player is expected to exit at
+function shuffle(array){
+    for (let i = array.length -1; i >= 0; i--){
+        let temp = array[i];
+        let index = Math.floor(Math.random()*i)
+        array[i] = array[index];
+        array[index] = temp;
+    }
+    return array;
+}
+
 var designedRegions = [
     {y0:3, y1: 0, p: [
-        [0,0,1,1,5,F],
-        [0,0,0,5,F,F],
-        [0,0,0,F,F,F],
-        [0,0,F,F,F,F]
+        [0,0,5,F,0,0],
+        [0,5,F,F,0,0],
+        [0,F,F,F,1,0],
+        [F,F,F,F,1,0]
     ]}, //assending staircase
     {y0:3, y1: 0, p: [
         [0,0,0,0,0,F],
         [0,0,5,F,5,0],
         [0,0,0,0,0,0],
-        [0,F,F,5,1,0]
+        [F,F,0,5,1,0]
     ]}, //assending platforms
     {y0:0, y1: 3, p: [
-        [F,5,1,1,0,0],
-        [F,F,5,0,0,0],
+        [F,5,0,0,0,1],
+        [F,F,5,0,0,1],
         [F,F,F,0,0,0],
         [F,F,F,F,0,0]
     ]}, //descending staircase
@@ -30,6 +40,55 @@ var designedRegions = [
         [F,F,5,0,1],
         [F,F,F,0,0]
     ]}, //descending staircase kinda
+    {y0:0, y1: 9, p: [
+        [F,0,0,9,6,F,F,F,F,F,F],
+        [F,0,0,0,0,0,0,0,4,F,F],
+        [F,3,F,F,F,0,0,0,0,0,F],
+        [F,1,1,F,F,F,F,5,0,5,F],
+        [F,1,0,0,0,0,0,0,0,0,9],
+        [F,F,0,0,0,0,5,F,F,F,F],
+        [F,F,F,0,0,F,F,9,5,3,F],
+        [1,0,0,0,0,0,0,0,9,F,0],
+        [9,0,0,0,0,0,0,0,0,0,0],
+        [F,F,1,1,1,F,F,5,F,F,F],
+    ]}, //tight cave
+    {y0:3, y1: 9, p: [
+        [F,F,9,9,6,F,F,F,F,F,F],
+        [0,0,0,0,0,0,0,0,0,0,F],
+        [0,F,F,F,F,1,0,F,F,0,F],
+        [F,1,1,F,F,F,F,5,0,0,F],
+        [F,1,0,0,0,0,0,0,0,0,9],
+        [F,0,0,F,F,9,5,F,F,F,F],
+        [F,0,F,0,0,F,F,0,0,3,F],
+        [0,0,0,0,0,0,0,0,0,F,0],
+        [0,0,0,0,0,0,0,0,0,0,0],
+        [F,F,1,1,1,F,F,5,F,F,F],
+    ]}, //tighter cave
+    {y0:6, y1: 9, p: [
+        [0,0,0,0,F,F,F,0,0,0,0],
+        [0,0,0,F,1,1,1,F,0,0,0],
+        [F,0,0,F,1,1,1,F,0,0,F],
+        [0,0,0,0,F,F,F,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,1,0],
+        [0,0,0,0,0,0,F,0,1,0,0],
+        [0,F,F,0,1,0,0,0,0,0,0],
+        [F,1,1,F,0,0,0,0,0,0,0],
+        [F,1,1,F,0,0,0,F,F,0,0],
+        [0,F,F,0,0,0,F,1,1,F,0],
+        [0,0,0,0,0,0,0,F,F,0,0],
+    ]}, //bubbles
+    {y0:9, y1: 9, p: [
+        [0,0,F,0,0,0,0,0],
+        [F,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,F,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [F,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,F,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [F,F,F,0,0,0,0,0],
+    ]}, //tall
     {y0:7, y1: 5, p: [
         [F,F,F,9,6,F,F,F,F,F,F],
         [F,F,F,8,1,0,0,0,4,F,F],
@@ -80,16 +139,38 @@ class LEVEL {
         AllTiles = []; //clear tiles
         this.p = p;
 
-        p.spawnKeys();
-        /*
-        if (p.door) 
-            p.door.reset();
-        const br = Math.floor(p.height / TILESIZE) - 1;
-        const dX = p.worldWidth - 3 * TILESIZE;
-        const dY = br * TILESIZE + 18 - TILESIZE * 2;
-        p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
-        */
-        this.debug = new CHUNK(p,0,10,possibleimages)
+        p.floor = new COLLIDER(p.worldWidth, TILESIZE, 0, p.height+TILESIZE);
+
+        this.chunks = [];
+        let x = 5;
+        for (let i = Math.random()*10+5; i > 0; i --){
+            if (this.chunks.at(-1))
+                x += this.chunks.at(-1).w;
+            this.chunks.push(new CHUNK(p,x,10,possibleimages));
+        }
+        p.worldWidth = (this.chunks.at(-1).w + this.chunks.at(-1).x + 5) * TILESIZE;
+
+        //spawn player at second to first chunk (aesthetic reasons)
+        p.player = new PLAYER(p, p.playerSprites,this.chunks[1].x*TILESIZE-TILESIZE/2,(this.chunks[1].startY-2)*TILESIZE-1);
+        
+        //spawn player just after second to last chunk (see previous)
+        p.door = new Door(p, this.chunks.at(-1).x*TILESIZE-TILESIZE/2,(this.chunks.at(-1).startY-2)*TILESIZE-1, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
+
+        //get spawn locations for keys
+        let locations = [];
+        for (let i = 2; i < this.chunks.length - 1; i ++){
+            locations.push({x: this.chunks[i].x*TILESIZE-TILESIZE/2, y:(this.chunks[i].startY-2)*TILESIZE-1});
+            console.log(locations);
+        }
+        shuffle(locations);
+        
+        //spawn keys
+        p.totalKeys = Math.floor(Math.random()*locations.length+1);
+        p.keysCollected = 0;
+        p.keys = []; //clear keys
+        for (let i = 0; i < p.totalKeys; i ++)
+            p.keys.push(new Key(p, locations[i].x, locations[i].y, p.keyImage));
+
     }
     draw(){
         //draw key
@@ -120,9 +201,9 @@ class CHUNK {
         let design = [];
         let designInfo = {};
         let doGenerate = Math.random()*100 > D_RATIO;
+        //generate a possible layout of tiles
         if (doGenerate){
             this.w = Math.floor(Math.random()*10+5);
-            console.log(this.w);
             this.h = Math.floor(p.height/TILESIZE)-1;
             let pStartCoords = [];
             for (let y = 0; y < this.h; y++){
@@ -151,12 +232,14 @@ class CHUNK {
                 y0 = p.constrain(y0 + p.random([-1,0,1,direction,direction]),4,this.h-1);
                 distance += (temp-y0)+.5;
             }
+        //use one of the pre generated possible layouts of tiles
         }else{
             designInfo = p.random(designedRegions);
             design = designInfo.p.slice();
             this.w = design[0].length;
             this.h = design.length;
         }
+        //place tiles in the level
         for (let y = 0; y < this.h; y++){
             for (let x = 0; x < this.w; x++){
                 if (Math.random()*9 >= design[y][x])
@@ -172,8 +255,6 @@ class CHUNK {
             }
         }
         console.log(design);
-
-        p.player = new PLAYER(p, p.playerSprites,this.x*TILESIZE-20,(this.startY-2)*TILESIZE-1);
     }
 }
 
@@ -200,60 +281,3 @@ class TILE{
             this.p.image(this.image,this.x,this.y,this.w,this.h);
     }
 }
-
-/*
-    p.generatePlatforms = function() {
-        for (let y = 0; y < p.height/TILESIZE; y++) {
-            p.platforms[y] = []
-        }
-        for (let y = 0; y < p.height/TILESIZE; y++) {
-            for (let x = 0; x < p.worldWidth/TILESIZE; x++) {
-                if (x < 5) {
-                    p.platforms[y][x] = -1
-                } else if (p.random() < 0.01) {
-                    p.generateSubArea(0,x,y)
-                } else if (p.random() < 0.02) {
-                    p.generateSubArea(1,x,y)
-                } else if (p.platforms[y][x] == null) {
-                    p.platforms[y][x] = 0
-                }
-            }
-        }
-        // Add walls at both ends of the level
-        for (let y = 0; y < p.height/TILESIZE; y++) {
-            // Left wall
-            p.platforms[y][0] = 1;
-            new COLLIDER(TILESIZE, TILESIZE, 0, y*TILESIZE+18);
-            
-            // Right wall
-            p.platforms[y][p.worldWidth/TILESIZE - 1] = 1;
-            new COLLIDER(TILESIZE, TILESIZE, (p.worldWidth/TILESIZE - 1)*TILESIZE, y*TILESIZE+18);
-        }
-        // Fill bottom row with solid tiles and colliders
-        let bottomRow = Math.floor(p.height / TILESIZE) - 1;
-        for (let x = 0; x < p.worldWidth / TILESIZE; x++) {
-            p.platforms[bottomRow][x] = 2;
-            new COLLIDER(
-                TILESIZE,
-                TILESIZE,
-                x * TILESIZE,
-                bottomRow * TILESIZE + 18
-            );
-        }
-
-        console.log(p.platforms)
-    }
-
-    p.generateSubArea = function(subAreaNum, x, y) {
-        console.log(platformAreas[subAreaNum])
-        for (let j = 0; j < platformAreas[subAreaNum].length; j++) {
-            for (let i = 0; i < platformAreas[subAreaNum][0].length; i++) {
-                console.log(i,j,platformAreas[subAreaNum][j][i])
-                if (p.platforms[y+j] != undefined && platformAreas[subAreaNum][j][i] != 0) {
-                    p.platforms[y+j][x+i] = platformAreas[subAreaNum][j][i]
-                    new COLLIDER(TILESIZE, TILESIZE,(x+i)*TILESIZE, (y+j)*TILESIZE+18);
-                }
-            }
-        }
-    }
-    */

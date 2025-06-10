@@ -22,7 +22,7 @@ class Door {
             this.state = "unlocked";
             let temp = () => {
                 this.p.score ++;
-                this.p.reset();
+                this.p.reset(this.p.score);
             }
             this.col.addListener("x",temp);
             this.col.addListener("y",temp);

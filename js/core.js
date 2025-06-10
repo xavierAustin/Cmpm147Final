@@ -27,36 +27,6 @@ inputs = {
 }
 
 s = function(p){
-
-    // Remove any platform or collider at the door column (floor and one above)
-    p.clearDoorArea = function() {
-        const doorCol = Math.floor(p.worldWidth / TILESIZE) - 2;
-        const bottomRow = Math.floor(p.height / TILESIZE) - 1;
-
-        // Clear platform grid cells
-        if (p.platforms[bottomRow]) {
-            p.platforms[bottomRow][doorCol] = 0;
-        }
-        if (p.platforms[bottomRow - 1]) {
-            p.platforms[bottomRow - 1][doorCol] = 0;
-        }
-
-        // Pixel coordinates for possible colliders
-        const px = doorCol * TILESIZE;
-        const pyFloor = bottomRow * TILESIZE + 18;
-        const pyAbove = (bottomRow - 1) * TILESIZE + 18;
-
-        // Destroy any colliders at those positions
-        for (let c of [...AllColliders]) {
-            if (
-                (c.x === px && c.y === pyFloor) ||
-                (c.x === px && c.y === pyAbove)
-            ) {
-                c.destroy();
-            }
-        }
-    }
-
     p.preload = function(){
         p.tiles = {
             sml:[p.loadImage('./assets/baseplatformtilesmall.png'),p.loadImage('./assets/platformtilesmallrocky.png'),p.loadImage('./assets/DirtTile2.png')],
@@ -104,7 +74,7 @@ s = function(p){
         //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
         p.cameraOffset = 0;
-        p.worldWidth = p.width * 3; // Set world width to 3x window width
+        p.worldWidth = 100 * TILESIZE; // Set world width to 100 tiles (modified by LEVEL)
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
         p.playerSprites.jump.push(p.playerSprites.run.at(-1));
@@ -117,109 +87,15 @@ s = function(p){
         let button = document.getElementById("randomizeBtn");
         button.addEventListener("click", p.reset);
 
-        //create player
-        //p.player = new PLAYER(p, p.playerSprites);
-        p.level = new LEVEL(p,p.tiles);
-
-        //debug floor and platforms
-        p.floor = new COLLIDER(p.worldWidth, 32, 0, p.height-32);
+        //generate level (creates player, doors, keys, etc.)
         p.randomSeed();
-        //p.platforms = [];
-        //p.generatePlatforms();
-
-        // Ensure no platform spawns on or above the door column
-        //p.clearDoorArea();
-
-        // Set up one key
-        p.totalKeys = 1;
-        p.keysCollected = 0;
-        p.keys = [];
-        p.spawnKeys();
-        p.score = 0;
-
-        // Set up the door one tile left of far-right
-        const bottomRow = Math.floor(p.height / TILESIZE) - 1;
-        const doorX = p.worldWidth - 3 * TILESIZE;
-        const doorY = bottomRow * TILESIZE + 18 - TILESIZE * 2;
-        p.door = new Door(p, doorX, doorY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
-
-        /*
-        //
-        forest1Layer = p.createGraphics(p.width, p.height);
-        forest1Layer.noSmooth()
-        forest1Layer.image(forestBackground1, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-
-        forest2Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-        forest2Layer.noSmooth()
-        forest2Layer.image(forestBackground2, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-
-        hillsLayer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-        hillsLayer.noSmooth()
-        hillsLayer.image(hillsBackground, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-
-        mountain1Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-        mountain1Layer.noSmooth()
-        mountain1Layer.image(mountainBackground1, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-
-        mountain2Layer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-        mountain2Layer.noSmooth()
-        mountain2Layer.image(mountainBackground2, 0, 0, p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-
-        cloudsLayer = p.createGraphics(p.width/backgroundShrinkage, p.height/backgroundShrinkage);
-        cloudsLayer.noSmooth()
-        cloudsLayer.image(cloudsBackground, 0, 0, p.width, p.height);
-        */
-    }
-
-    p.spawnKeys = function() {
-        /*const rows = Math.floor(p.height / TILESIZE);
-        const cols = Math.floor(p.worldWidth / TILESIZE);
-
-        const candidates = [];
-        for (let ty = 1; ty < rows; ty++) {
-            for (let tx = 0; tx < cols; tx++) {
-                if (p.platforms[ty][tx] === 1) {
-                    const above = p.platforms[ty - 1][tx];
-                    if (above === 0 || above === null) {
-                        candidates.push({ tx, ty });
-                    }
-                }
-            }
-        }
-
-        if (candidates.length < p.totalKeys) {
-            console.warn("Not enough surface tiles to place keys.");
-            return;
-        }
-
-        const idx = Math.floor(p.random(0, candidates.length));
-        const { tx, ty } = candidates[idx];
-        const keyPx = tx * TILESIZE;
-        const keyPy = ty * TILESIZE + 18 - TILESIZE*2;
-        const newKey = new Key(p, keyPx, keyPy, p.keyImage, TILESIZE);
-        p.keys.push(newKey);*/
-    }
-
-    p.reset = function(){
         p.level = new LEVEL(p,p.tiles);
-        //AllColliders = []; // clear colliders
-        //p.generatePlatforms(); // regenerate platforms
+        p.reset();
+    }
 
-        // Clear any platform under/above door again
-        //p.clearDoorArea();
-
-        // reset player to ground
-        //p.player = new PLAYER(p, p.playerSprites); //respawn player
-        // reset keys
-        //p.spawnKeys();
-
-        // reset door
-        //if (p.door) 
-        //    p.door.reset();
-        //const br = Math.floor(p.height / TILESIZE) - 1;
-        //const dX = p.worldWidth - 3 * TILESIZE;
-        //const dY = br * TILESIZE + 18 - TILESIZE * 2;
-        //p.door = new Door(p, dX, dY, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
+    p.reset = function(score = 0){
+        p.level = new LEVEL(p,p.tiles);
+        p.score = Number.isInteger(score) ? score : 0;
     }
 
     p.draw = function(){
