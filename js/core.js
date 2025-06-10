@@ -1,4 +1,4 @@
-const COLLIDERDEBUG = true;
+const COLLIDERDEBUG = false;
 const TILESIZE = 64;
 
 const KEYMMAP = {
@@ -224,7 +224,7 @@ s = function(p){
 
     p.draw = function(){
         // Update camera position to follow player
-        let targetOffset = p.player.col.getPosition("x") - p.width/2;
+        let targetOffset = p.player.col.getPosition("x") - p.width/2 + p.player.facing * TILESIZE + p.player.col.getBounds("w") ;
         p.cameraOffset = p.lerp(p.cameraOffset, targetOffset, 0.1);
         
         // Clamp camera offset to world bounds
