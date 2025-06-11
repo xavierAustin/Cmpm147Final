@@ -63,9 +63,12 @@ s = function(p){
 
         //box sprite
         p.box = p.loadImage('./assets/box.png');
+        
+        //door sprites
         p.doorClosedImg = p.loadImage('./assets/closed_door.png');
         p.doorOpenImg = p.loadImage('./assets/openopen_door.png');
         p.doorUnlockedImg = p.loadImage('./assets/open_door.png');
+        p.usedDoorImg = p.loadImage('./assets/used_door.png');
     }
 
     p.setup = function(){
@@ -87,6 +90,9 @@ s = function(p){
         let button = document.getElementById("randomizeBtn");
         button.addEventListener("click", p.reset);
 
+        button = document.getElementById("doubleJmpBtn");
+        button.addEventListener("click", p.toggleDoubleJump);
+
         //generate level (creates player, doors, keys, etc.)
         p.randomSeed();
         p.level = new LEVEL(p,p.tiles);
@@ -99,6 +105,12 @@ s = function(p){
     p.reset = function(score = 0){
         p.level = new LEVEL(p,p.tiles);
         p.score = Number.isInteger(score) ? score : 0;
+    }
+
+    p.toggleDoubleJump = function(){
+        p.canDoubleJump = !p.canDoubleJump;
+        document.getElementById("doubleJmpBtn").innerHTML = "More Movement Mode (Currently "+(p.canDoubleJump? "On" : "Off")+")";
+        p.reset();
     }
 
     p.draw = function(){

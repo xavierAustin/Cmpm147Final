@@ -1,7 +1,7 @@
 var AllTiles = [];
 const REPLACE_BIG = 50 //percent chance that 4 tiles are merged into one big tile
 const PLATFORM_SIZE = 7; //number of tiles that make up a generated platform
-const D_RATIO = 100 //percent of chunks that use designed regions as opposed to generated ones
+const D_RATIO = 50 //percent of chunks that use designed regions as opposed to generated ones
 const F = 10; //just for easier readability for the designed regions; stands for filled
 // p = percent chance divided by 10 that a space is filled with a tile
 // y0 = y player is expected to be at (the first defined row is y = 1; 0 is atop the whole construction)
@@ -18,10 +18,10 @@ function shuffle(array){
 
 var designedRegions = [
     {y0:3, y1: 0, p: [
-        [0,0,5,F,0,0],
-        [0,5,F,F,0,0],
-        [0,F,F,F,1,0],
-        [F,F,F,F,1,0]
+        [0,0,5,F,0,0],//y = 1 (0 is above this)
+        [0,5,F,F,0,0],//y = 2
+        [0,F,F,F,1,0],//y = 3
+        [F,F,F,F,1,0] //y = 4
     ]}, //assending staircase
     {y0:3, y1: 0, p: [
         [0,0,0,0,0,F],
@@ -99,6 +99,9 @@ var designedRegions = [
         [0,0,0,0,0,0,0,0,0,0,3,F,F],
         [F,F,F,1,1,1,5,F,5,1,F,F,0],
     ]}, //small cave
+    {y0:0, y1: 0, p: [
+        [F,0,0,0,0,0,F]
+    ]}, //big jump
     {y0:10, y1: 4, p: [
         [F,F,F,F,F,F,F,F,F,F,F],
         [F,F,F,8,3,0,0,0,4,F,F],
@@ -141,10 +144,12 @@ class LEVEL {
 
         this.chunks = [];
         let x = 5;
+        let yStart = 0;
         for (let i = Math.random()*10+5; i > 0; i --){
             if (this.chunks.at(-1))
                 x += this.chunks.at(-1).w;
-            this.chunks.push(new CHUNK(p,x,-10,possibleimages));
+            this.chunks.push(new CHUNK(p,x,yStart,possibleimages));
+            yStart = this.chunks.at(-1).endY;
         }
         p.worldWidth = (this.chunks.at(-1).w + this.chunks.at(-1).x + 5) * TILESIZE;
 
@@ -153,6 +158,8 @@ class LEVEL {
 
         //spawn player at second to first chunk (aesthetic reasons)
         p.player = new PLAYER(p, p.playerSprites,this.chunks[1].x*TILESIZE-TILESIZE/2,(this.chunks[1].startY-2)*TILESIZE-1);
+        //spawn used door (see previous)
+        p.usedDoor = new DECORE(p,this.chunks[1].x*TILESIZE-TILESIZE/2,(this.chunks[1].startY-2)*TILESIZE-1,p.usedDoorImg)
         
         //spawn player just after second to last chunk (see previous)
         p.door = new Door(p, this.chunks.at(-1).x*TILESIZE-TILESIZE/2,(this.chunks.at(-1).startY-2)*TILESIZE-1, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
@@ -174,6 +181,8 @@ class LEVEL {
 
     }
     draw(){
+        this.p.usedDoor.draw();
+
         //draw key
         for (let k of this.p.keys) {
             k.draw();
@@ -198,6 +207,7 @@ class CHUNK {
     constructor(p,xStart,playerYAtChunkStart,possibleimages){
         this.x = xStart;
         this.startY = playerYAtChunkStart;
+        this.endY = 0;
         this.tiles = [];
         let design = [];
         let designInfo = {};
@@ -233,10 +243,13 @@ class CHUNK {
                 y0 = p.constrain(y0 + p.random([-1,0,1,direction,direction]),4,this.h-1);
                 distance += (temp-y0)+.5;
             }
+            designInfo.y1 = y0;
         //use one of the pre generated possible layouts of tiles
         }else{
-            designInfo = p.random(designedRegions);
-            //design = designInfo.p.slice();
+            do{ //make sure to not generate oob
+                designInfo = p.random(designedRegions);
+            }while ((designInfo.y1-designInfo.y0)+this.startY > p.height/TILESIZE)
+            //design = designInfo.p.slice(); man i wish javascript worked
             this.w = designInfo.p[0].length;
             this.h = designInfo.p.length;
             design = [];
@@ -263,6 +276,7 @@ class CHUNK {
             }
         }
         console.log(design);
+        this.endY = (designInfo.y1-designInfo.y0)+this.startY;
     }
 }
 
