@@ -12,6 +12,8 @@ class PLAYER{
         this.anim_current = "idle";
         this.facing = 1;
         this.aim = 0;
+        this.hasDoubleJumped = false; // Track if player has used their double jump
+        this.canDoubleJump = true;
         this.sleepTimer = 0;
         this.grapple = null;
         this.BBinfo = {w:w,h:h,BBx:bbx,BBy:bby,hHalf:h/2};
@@ -22,6 +24,7 @@ class PLAYER{
         let _dx = this.col.getVelocity("x") / 4;
         let _dy = this.col.getVelocity("y") / 4;
         let move = (inputs.right.h-inputs.left.h) * 1.4;
+        let grounded = this.col.meetingSolid(x,y+2);
         this.aim = (inputs.down.h-inputs.up.h);
         this.jumpBuffer = Math.max(this.jumpBuffer - 1, 0);
         //console.log(this.jumpBuffer);
@@ -30,6 +33,7 @@ class PLAYER{
             this.jumpBuffer = 6;
         switch (this.state){
             default:
+                this.hasDoubleJumped = false;
                 _dx /= 5;
                 _dy = 1.5;
                 if (inputs.act.h)
@@ -39,12 +43,13 @@ class PLAYER{
                     this.state = "jump";
                 }else if (move != 0)
                     this.state = "run";
-                else if (!this.col.meetingSolid(x,y+2))
+                else if (!grounded)
                     this.ctjump ++;
                 if (this.ctjump > 3)
                     this.state = "fall";
             break;
             case "run":
+                this.hasDoubleJumped = false;
                 _dx = (move+_dx*4)/5;
                 _dy = 1.5;
                 if (inputs.act.h)
@@ -52,7 +57,7 @@ class PLAYER{
                 if (this.jumpBuffer){
                     _dy = -3.2;
                     this.state = "jump";
-                }else if (!this.col.meetingSolid(x,y+2))
+                }else if (!grounded)
                     this.ctjump ++;
                 else if (move == 0)
                     this.state = "idle";
@@ -66,40 +71,73 @@ class PLAYER{
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.17-0.1*(_dy > -1 && inputs.jump.h);
-                if (inputs.act.h)
+                if (inputs.jump.p && inputs.act.h && this.canDoubleJump && !this.hasDoubleJumped){
+                    this.state = "crouch";
+                    this.hasDoubleJumped = true;
+                    _dx = move;
+                    _dy = -2.7;
+                }else if (inputs.jump.p && this.canDoubleJump && !this.hasDoubleJumped){
+                    this.state = "jump";
+                    this.hasDoubleJumped = true;
+                    _dx = move;
+                    _dy = -2.7;
+                }else if (inputs.act.h)
                     this.state = "crouch";
                 if (_dy > 1)
                     this.state = "fall";
-                else if (move == 0 && this.col.meetingSolid(x,y+2))
+                else if (move == 0 && grounded)
                     this.state = "idle";
-                else if (this.col.meetingSolid(x,y+2))
+                else if (grounded)
                     this.state = "run";
             break;
             case "fall":
                 this.ctjump = 0;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.25;
-                if (inputs.act.h)
+                if (inputs.jump.p && inputs.act.h && this.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "crouch";
-                if (move == 0 && (_dy > 0) && this.col.meetingSolid(x,y+2))
+                    this.hasDoubleJumped = true;
+                    _dx = move;
+                    _dy = -2.7;
+                }else if (inputs.jump.p && this.canDoubleJump && !this.hasDoubleJumped){
+                    this.state = "jump";
+                    this.hasDoubleJumped = true;
+                    _dx = move;
+                    _dy = -2.7;
+                }else if (inputs.act.h)
+                    this.state = "crouch";
+                else if (move == 0 && (_dy > 0) && grounded)
                     this.state = "idle";
-                else if (this.col.meetingSolid(x,y+2) && (_dy > 0))
+                else if (grounded && (_dy > 0))
                     this.state = "run";
             break;
             case "crouch":
+                if (grounded)
+                    this.hasDoubleJumped = false;
                 _dy += 0.25;
                 _dx = (move + _dx*8)/9;
-                if (move != 0 && this.col.meetingSolid(x,y+2))
+                if (move != 0 && grounded && !this.jumpBuffer)
                     this.state = "crawl";
-                if (this.jumpBuffer && this.col.meetingSolid(x,y+2))
+                if (this.jumpBuffer && grounded)
                     _dy = -2.7;
+                if (this.col.meeting())
+                    this.hasDoubleJumped;
+                else if (inputs.act.p && !this.hasDoubleJumped){
+                    _dy = -2.7;
+                    this.hasDoubleJumped = true;
+                }
                 this.ctjump = 0;
                 this.jumpBuffer = 0;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
                 if (inputs.act.h || this.col.meetingSolid(x,y-this.BBinfo.hHalf))
                     break;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
-                if (!this.col.meetingSolid(x,y+2))
+                if (inputs.jump.p && this.canDoubleJump && !this.hasDoubleJumped){
+                    this.state = "jump";
+                    this.hasDoubleJumped = true;
+                    _dx = move;
+                    _dy = -2.7;
+                }else if (!grounded)
                     this.state = "fall";
                 else if (move == 0)
                     this.state = "idle";
@@ -107,9 +145,10 @@ class PLAYER{
                     this.state = "run";
             break;
             case "crawl":
+                this.hasDoubleJumped = false;
                 _dx = (move+_dx*4)/7;
                 _dy = 1.5;
-                if (move == 0 || !this.col.meetingSolid(x,y+2))
+                if (move == 0 || !grounded)
                     this.state = "crouch";
                 if (this.jumpBuffer){
                     this.state = "crouch";
