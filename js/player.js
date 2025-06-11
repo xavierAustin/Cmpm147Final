@@ -13,7 +13,6 @@ class PLAYER{
         this.facing = 1;
         this.aim = 0;
         this.hasDoubleJumped = false; // Track if player has used their double jump
-        this.canDoubleJump = true;
         this.sleepTimer = 0;
         this.grapple = null;
         this.BBinfo = {w:w,h:h,BBx:bbx,BBy:bby,hHalf:h/2};
@@ -71,15 +70,15 @@ class PLAYER{
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.17-0.1*(_dy > -1 && inputs.jump.h);
-                if (inputs.jump.p && inputs.act.h && this.canDoubleJump && !this.hasDoubleJumped){
+                if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "crouch";
                     this.hasDoubleJumped = true;
-                    _dx = move;
+                    _dx = move * 1.3;
                     _dy = -2.7;
-                }else if (inputs.jump.p && this.canDoubleJump && !this.hasDoubleJumped){
+                }else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
-                    _dx = move;
+                    _dx = move * 1.3;
                     _dy = -2.7;
                 }else if (inputs.act.h)
                     this.state = "crouch";
@@ -94,15 +93,15 @@ class PLAYER{
                 this.ctjump = 0;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.25;
-                if (inputs.jump.p && inputs.act.h && this.canDoubleJump && !this.hasDoubleJumped){
+                if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "crouch";
                     this.hasDoubleJumped = true;
-                    _dx = move;
+                    _dx = move * 1.3;
                     _dy = -2.7;
-                }else if (inputs.jump.p && this.canDoubleJump && !this.hasDoubleJumped){
+                }else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
-                    _dx = move;
+                    _dx = move * 1.3;
                     _dy = -2.7;
                 }else if (inputs.act.h)
                     this.state = "crouch";
@@ -132,10 +131,10 @@ class PLAYER{
                 if (inputs.act.h || this.col.meetingSolid(x,y-this.BBinfo.hHalf))
                     break;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
-                if (inputs.jump.p && this.canDoubleJump && !this.hasDoubleJumped){
+                if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
-                    _dx = move;
+                    _dx = move * 1.3;
                     _dy = -2.7;
                 }else if (!grounded)
                     this.state = "fall";

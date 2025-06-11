@@ -93,6 +93,7 @@ s = function(p){
         p.reset();
         p.widthHalf = p.width/2;
         p.heightHalf = p.height/2;
+        p.canDoubleJump = false;
     }
 
     p.reset = function(score = 0){
