@@ -18,10 +18,10 @@ function shuffle(array){
 
 var designedRegions = [
     {y0:3, y1: 0, p: [
-        [0,0,5,F,0,0],
-        [0,5,F,F,0,0],
-        [0,F,F,F,1,0],
-        [F,F,F,F,1,0]
+        [0,0,5,F,0,0],//y = 1 (0 is above this)
+        [0,5,F,F,0,0],//y = 2
+        [0,F,F,F,1,0],//y = 3
+        [F,F,F,F,1,0] //y = 4
     ]}, //assending staircase
     {y0:3, y1: 0, p: [
         [0,0,0,0,0,F],
@@ -99,6 +99,9 @@ var designedRegions = [
         [0,0,0,0,0,0,0,0,0,0,3,F,F],
         [F,F,F,1,1,1,5,F,5,1,F,F,0],
     ]}, //small cave
+    {y0:0, y1: 0, p: [
+        [F,0,0,0,0,0,F]
+    ]}, //big jump
     {y0:10, y1: 4, p: [
         [F,F,F,F,F,F,F,F,F,F,F],
         [F,F,F,8,3,0,0,0,4,F,F],
@@ -141,10 +144,12 @@ class LEVEL {
 
         this.chunks = [];
         let x = 5;
+        let yStart = 0;
         for (let i = Math.random()*10+5; i > 0; i --){
             if (this.chunks.at(-1))
                 x += this.chunks.at(-1).w;
-            this.chunks.push(new CHUNK(p,x,-10,possibleimages));
+            this.chunks.push(new CHUNK(p,x,yStart,possibleimages));
+            yStart = this.chunks.at(-1).endY;
         }
         p.worldWidth = (this.chunks.at(-1).w + this.chunks.at(-1).x + 5) * TILESIZE;
 
@@ -198,6 +203,7 @@ class CHUNK {
     constructor(p,xStart,playerYAtChunkStart,possibleimages){
         this.x = xStart;
         this.startY = playerYAtChunkStart;
+        this.endY = 0;
         this.tiles = [];
         let design = [];
         let designInfo = {};
@@ -236,7 +242,7 @@ class CHUNK {
         //use one of the pre generated possible layouts of tiles
         }else{
             designInfo = p.random(designedRegions);
-            //design = designInfo.p.slice();
+            //design = designInfo.p.slice(); man i wish javascript worked
             this.w = designInfo.p[0].length;
             this.h = designInfo.p.length;
             design = [];
@@ -263,6 +269,7 @@ class CHUNK {
             }
         }
         console.log(design);
+        this.endY = (designInfo.y1-designInfo.y0)+this.startY;
     }
 }
 
