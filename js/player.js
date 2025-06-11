@@ -14,6 +14,7 @@ class PLAYER{
         this.sleepTimer = 0;
         this.grapple = null;
         this.BBinfo = {w:w,h:h,BBx:bbx,BBy:bby,hHalf:h/2};
+        this.hasDoubleJumped = false; // Track if player has used their double jump
     }
     update(){
         let x = this.col.getPosition("x");
@@ -36,6 +37,7 @@ class PLAYER{
                 if (this.jumpBuffer){
                     _dy = -2.7;
                     this.state = "jump";
+                    this.hasDoubleJumped = false; // Reset double jump when landing
                 }else if (move != 0)
                     this.state = "run";
                 else if (!this.col.meetingSolid(x,y+2))
@@ -51,6 +53,7 @@ class PLAYER{
                 if (this.jumpBuffer){
                     _dy = -3.2;
                     this.state = "jump";
+                    this.hasDoubleJumped = false; // Reset double jump when landing
                 }else if (!this.col.meetingSolid(x,y+2))
                     this.ctjump ++;
                 else if (move == 0)
@@ -80,6 +83,12 @@ class PLAYER{
                 _dy += 0.25;
                 if (inputs.act.h)
                     this.state = "crouch";
+                // Allow double jump while falling
+                if (this.jumpBuffer && !this.hasDoubleJumped) {
+                    _dy = -2.7;
+                    this.hasDoubleJumped = true;
+                    this.state = "jump";
+                }
                 if (move == 0 && (_dy > 0) && this.col.meetingSolid(x,y+2))
                     this.state = "idle";
                 else if (this.col.meetingSolid(x,y+2) && (_dy > 0))
