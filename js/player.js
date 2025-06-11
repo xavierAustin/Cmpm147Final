@@ -114,9 +114,6 @@ class PLAYER{
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
                     _dy = -2.7;
-                }else if (inputs.jump.p){
-                    this.state = "jump";
-                    _dy = -2.7;
                 }
                 this.ctjump = 0;
                 this.jumpBuffer = 0;
