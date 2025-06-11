@@ -11,6 +11,7 @@ class PLAYER{
         this.anim_index = 0;
         this.anim_current = "idle";
         this.facing = 1;
+        this.aim = 0;
         this.sleepTimer = 0;
         this.grapple = null;
         this.BBinfo = {w:w,h:h,BBx:bbx,BBy:bby,hHalf:h/2};
@@ -21,7 +22,7 @@ class PLAYER{
         let _dx = this.col.getVelocity("x") / 4;
         let _dy = this.col.getVelocity("y") / 4;
         let move = (inputs.right.h-inputs.left.h) * 1.4;
-        let aim = (inputs.down.h-inputs.up.h);
+        this.aim = (inputs.down.h-inputs.up.h);
         this.jumpBuffer = Math.max(this.jumpBuffer - 1, 0);
         //console.log(this.jumpBuffer);
         //6 frames buffer (if you press jump early youll jump whenever possible)
@@ -128,13 +129,13 @@ class PLAYER{
         //handle animations
         this.anim_index = (this.anim_index + 0.33);
         this.anim_current = this.state;
-        if (aim == 1 && this.state != "crawl" && this.state != "crouch")
+        if (this.aim == 1 && this.state != "crawl" && this.state != "crouch")
             this.anim_current += "Dw";
-        if (aim == -1 && this.state != "crawl" && this.state != "crouch")
+        if (this.aim == -1 && this.state != "crawl" && this.state != "crouch")
             this.anim_current += "Up";
         if (move != 0)
             this.facing = Math.sign(move);
-        if (this.state != "idle" || aim)
+        if (this.state != "idle" || this.aim)
             this.sleepTimer = this.p.frameCount
         else if (this.p.frameCount - this.sleepTimer > 1500)
             this.anim_current = "sleep";
@@ -155,8 +156,8 @@ class PLAYER{
                 this,
                 x - 32 + 128 * (this.facing == 1),
                 y,
-                _dx + this.facing * (5 - Math.abs(aim * 3)),
-                _dy + (aim == 1) * 12 - 8 - (aim == -1) * 3,
+                _dx + this.facing * (5 - Math.abs(this.aim * 3)),
+                _dy + (this.aim == 1) * 12 - 8 - (this.aim == -1) * 3,
                 64,
                 64
             );

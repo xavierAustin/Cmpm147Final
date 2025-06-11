@@ -73,7 +73,7 @@ s = function(p){
         p.select("canvas").elt.getContext("2d").imageSmoothingEnabled = false;
         //remove some caret browsing features (if we use space as an input it wont forcibly shoot the user to the bottom of the page)
         window.addEventListener("keydown", function(e) { if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].indexOf(e.code) > -1) {e.preventDefault();}}, false);
-        p.cameraOffset = 0;
+        p.cameraOffset = {x:0,y:0};
         p.worldWidth = 100 * TILESIZE; // Set world width to 100 tiles (modified by LEVEL)
         
         //stuff for placeholder images remove if an actual custom sprite or anim is made for jump/fall
@@ -91,6 +91,8 @@ s = function(p){
         p.randomSeed();
         p.level = new LEVEL(p,p.tiles);
         p.reset();
+        p.widthHalf = p.width/2;
+        p.heightHalf = p.height/2;
     }
 
     p.reset = function(score = 0){
@@ -100,11 +102,16 @@ s = function(p){
 
     p.draw = function(){
         // Update camera position to follow player
-        let targetOffset = p.player.col.getPosition("x") - p.width/2 + p.player.facing * TILESIZE + p.player.col.getBounds("w") ;
-        p.cameraOffset = p.lerp(p.cameraOffset, targetOffset, 0.1);
+        let targetOffset = {
+            x: p.player.col.getPosition("x") - p.widthHalf + p.player.facing * TILESIZE + p.player.col.getBounds("w"),
+            y: p.player.col.getPosition("y") - p.heightHalf + p.player.aim * TILESIZE*4 + TILESIZE
+        } ;
+        p.cameraOffset.x = p.lerp(p.cameraOffset.x, targetOffset.x, 0.1);
+        p.cameraOffset.y = p.lerp(p.cameraOffset.y, targetOffset.y, 0.1);
         
         // Clamp camera offset to world bounds
-        p.cameraOffset = p.constrain(p.cameraOffset, 0, p.worldWidth - p.width);
+        p.cameraOffset.x = p.constrain(p.cameraOffset.x, 0, p.worldWidth - p.width);
+        p.cameraOffset.y = Math.min(p.cameraOffset.y, 0);
 
         //update door (open when key collected)
         p.door.update();
@@ -121,12 +128,12 @@ s = function(p){
 
         //draw background
         //p.image(p.backgroundImage,0,0,p.width,p.height)
-        parallaxBackground(p)
+        parallaxBackground(p);
         //p.image(p.bigPlatformTile,0,0,TILESIZE*2,TILESIZE*2)
 
         //move the camera around player position
         p.push();
-        p.translate(-p.cameraOffset, 0);
+        p.translate(-p.cameraOffset.x, -p.cameraOffset.y);
 
         //debug colision draw
         p.push();

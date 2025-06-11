@@ -1,7 +1,7 @@
 var AllTiles = [];
 const REPLACE_BIG = 50 //percent chance that 4 tiles are merged into one big tile
 const PLATFORM_SIZE = 7; //number of tiles that make up a generated platform
-const D_RATIO = 50 //percent of chunks that use designed regions as opposed to generated ones
+const D_RATIO = 100 //percent of chunks that use designed regions as opposed to generated ones
 const F = 10; //just for easier readability for the designed regions; stands for filled
 // p = percent chance divided by 10 that a space is filled with a tile
 // y0 = y player is expected to be at (the first defined row is y = 1; 0 is atop the whole construction)
@@ -64,7 +64,7 @@ var designedRegions = [
         [0,0,0,0,0,0,0,0,0,0,0],
         [F,F,1,1,1,F,F,5,F,F,F],
     ]}, //tighter cave
-    {y0:6, y1: 9, p: [
+    {y0:7, y1: 9, p: [
         [0,0,0,0,F,F,F,0,0,0,0],
         [0,0,0,F,1,1,1,F,0,0,0],
         [F,0,0,F,1,1,1,F,0,0,F],
@@ -90,14 +90,14 @@ var designedRegions = [
         [F,F,F,0,0,0,0,0],
     ]}, //tall
     {y0:7, y1: 5, p: [
-        [F,F,F,9,6,F,F,F,F,F,F],
-        [F,F,F,8,1,0,0,0,4,F,F],
-        [F,3,3,F,F,0,0,0,0,0,F],
-        [F,1,1,F,F,F,0,0,0,0,0],
-        [F,1,0,0,0,0,9,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,F,F],
-        [0,0,0,0,0,0,0,0,0,3,F],
-        [F,F,1,1,1,5,F,5,1,F,F],
+        [0,F,F,F,9,6,F,F,F,F,F,F,0],
+        [F,F,F,F,8,1,0,0,0,4,F,F,F],
+        [F,F,3,3,F,F,0,0,0,0,0,F,F],
+        [F,F,1,1,F,F,F,0,0,0,0,0,0],
+        [F,F,0,0,0,0,0,9,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,F,F,F],
+        [0,0,0,0,0,0,0,0,0,0,3,F,F],
+        [F,F,F,1,1,1,5,F,5,1,F,F,0],
     ]}, //small cave
     {y0:10, y1: 4, p: [
         [F,F,F,F,F,F,F,F,F,F,F],
@@ -139,16 +139,17 @@ class LEVEL {
         AllTiles = []; //clear tiles
         this.p = p;
 
-        p.floor = new COLLIDER(p.worldWidth, TILESIZE, 0, p.height+TILESIZE);
-
         this.chunks = [];
         let x = 5;
         for (let i = Math.random()*10+5; i > 0; i --){
             if (this.chunks.at(-1))
                 x += this.chunks.at(-1).w;
-            this.chunks.push(new CHUNK(p,x,10,possibleimages));
+            this.chunks.push(new CHUNK(p,x,-10,possibleimages));
         }
         p.worldWidth = (this.chunks.at(-1).w + this.chunks.at(-1).x + 5) * TILESIZE;
+
+        p.floor = new COLLIDER(p.worldWidth, TILESIZE, 0, p.height+TILESIZE*4);
+        p.floor.addListener("y",p.reset);
 
         //spawn player at second to first chunk (aesthetic reasons)
         p.player = new PLAYER(p, p.playerSprites,this.chunks[1].x*TILESIZE-TILESIZE/2,(this.chunks[1].startY-2)*TILESIZE-1);
@@ -235,9 +236,16 @@ class CHUNK {
         //use one of the pre generated possible layouts of tiles
         }else{
             designInfo = p.random(designedRegions);
-            design = designInfo.p.slice();
-            this.w = design[0].length;
-            this.h = design.length;
+            //design = designInfo.p.slice();
+            this.w = designInfo.p[0].length;
+            this.h = designInfo.p.length;
+            design = [];
+            for (let y = 0; y < this.h; y++){
+                let temp = [];
+                for (let x = 0; x < this.w; x++)
+                    temp.push(designInfo.p[y][x]);
+                design.push(temp);
+            }
         }
         //place tiles in the level
         for (let y = 0; y < this.h; y++){
