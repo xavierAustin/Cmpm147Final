@@ -115,25 +115,27 @@ class PLAYER{
             case "crouch":
                 if (grounded)
                     this.hasDoubleJumped = false;
-                _dy += 0.25;
+                _dy += 0.25 - 0.08*(this.p.canDoubleJump);
                 _dx = (move + _dx*8)/9;
                 if (move != 0 && grounded && !this.jumpBuffer)
                     this.state = "crawl";
                 if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.hasDoubleJumped = true; //crouch jump
-                    _dx = move * 1.3;
+                    _dx = move * 1.5;
                     _dy = -2.7;
                 } else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
-                    _dx = move * 1.3;
+                    _dx = move * 1.5;
                     _dy = -2.7;
                 }
                 if (this.jumpBuffer && grounded){
                     this.state = "crouch";
                     _dy = -2.7;
-                    if (this.canDoubleJump)
-                        _dx = move * 1.3;
+                    if (this.p.canDoubleJump){
+                        _dx = move * 1.5;
+                        _dy = -2;
+                    }
                     this.jumpBuffer = 0;
                 }
                 this.ctjump = 0;
@@ -144,7 +146,7 @@ class PLAYER{
                 if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
-                    _dx = move * 1.3;
+                    _dx = move * 1.5;
                     _dy = -2.7;
                 }else if (!grounded)
                     this.state = "fall";
@@ -162,8 +164,10 @@ class PLAYER{
                 if (this.jumpBuffer && grounded){
                     this.state = "crouch";
                     _dy = -2.7;
-                    if (this.canDoubleJump)
+                    if (this.p.canDoubleJump){
                         _dx = move * 1.3;
+                        _dy = -2;
+                    }
                     this.jumpBuffer = 0;
                 }
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
