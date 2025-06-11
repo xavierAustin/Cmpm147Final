@@ -72,7 +72,12 @@ class PLAYER{
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.17-0.1*(_dy > -1 && inputs.jump.h);
-                if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
+                if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
+                    this.state = "crouch"; //crouch jump
+                    this.hasDoubleJumped = true;
+                    _dx = move * 1.3;
+                    _dy = -2.7;
+                }else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
@@ -90,7 +95,12 @@ class PLAYER{
                 this.ctjump = 0;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.25;
-                if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
+                if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
+                    this.state = "crouch"; //crouch jump
+                    this.hasDoubleJumped = true;
+                    _dx = move * 1.3;
+                    _dy = -2.7;
+                }else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
@@ -109,19 +119,34 @@ class PLAYER{
                 _dx = (move + _dx*8)/9;
                 if (move != 0 && grounded && !this.jumpBuffer)
                     this.state = "crawl";
-                if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
+                if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
+                    this.hasDoubleJumped = true; //crouch jump
+                    _dx = move * 1.3;
+                    _dy = -2.7;
+                } else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
                     _dy = -2.7;
                 }
+                if (this.jumpBuffer && grounded){
+                    this.state = "crouch";
+                    _dy = -2.7;
+                    if (this.canDoubleJump)
+                        _dx = move * 1.3;
+                    this.jumpBuffer = 0;
+                }
                 this.ctjump = 0;
-                this.jumpBuffer = 0;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
                 if (inputs.act.h || this.col.meetingSolid(x,y-this.BBinfo.hHalf))
                     break;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
-                if (!grounded)
+                if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
+                    this.state = "jump";
+                    this.hasDoubleJumped = true;
+                    _dx = move * 1.3;
+                    _dy = -2.7;
+                }else if (!grounded)
                     this.state = "fall";
                 else if (move == 0)
                     this.state = "idle";
@@ -134,9 +159,11 @@ class PLAYER{
                 _dy = 1.5;
                 if (move == 0 || !grounded)
                     this.state = "crouch";
-                if (this.jumpBuffer){
+                if (this.jumpBuffer && grounded){
                     this.state = "crouch";
                     _dy = -2.7;
+                    if (this.canDoubleJump)
+                        _dx = move * 1.3;
                     this.jumpBuffer = 0;
                 }
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
