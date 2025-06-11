@@ -22,7 +22,7 @@ class Door {
             this.state = "unlocked";
             let temp = () => {
                 this.p.score ++;
-                this.p.reset();
+                this.p.reset(this.p.score);
             }
             this.col.addListener("x",temp);
             this.col.addListener("y",temp);
@@ -47,6 +47,11 @@ class Door {
             this.p.image(this.imgClosed, this.x, this.y, this.size, this.size);
         else
             this.p.image(this.imgUnlocked, this.x, this.y, this.size, this.size);
+    }
+
+    reset(){
+        this.col.destroy();
+        this.col = null;
     }
 }
 
@@ -74,5 +79,10 @@ class Key {
     draw() {
         if (this.collected) return;
         this.p.image(this.img, this.x, this.y, this.size, this.size);
+    }
+
+    reset() {
+        this.p.keysCollected = 0;
+        this.p.keys = [];
     }
 }
