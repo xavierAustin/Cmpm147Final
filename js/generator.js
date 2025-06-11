@@ -239,9 +239,12 @@ class CHUNK {
                 y0 = p.constrain(y0 + p.random([-1,0,1,direction,direction]),4,this.h-1);
                 distance += (temp-y0)+.5;
             }
+            designInfo.y1 = y0;
         //use one of the pre generated possible layouts of tiles
         }else{
-            designInfo = p.random(designedRegions);
+            do{ //make sure to not generate oob
+                designInfo = p.random(designedRegions);
+            }while ((designInfo.y1-designInfo.y0)+this.startY > p.height/TILESIZE)
             //design = designInfo.p.slice(); man i wish javascript worked
             this.w = designInfo.p[0].length;
             this.h = designInfo.p.length;
