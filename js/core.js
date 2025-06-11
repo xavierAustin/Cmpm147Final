@@ -87,6 +87,9 @@ s = function(p){
         let button = document.getElementById("randomizeBtn");
         button.addEventListener("click", p.reset);
 
+        let button0 = document.getElementById("doubleJmpBtn");
+        button0.addEventListener("click", p.toggleDoubleJump);
+
         //generate level (creates player, doors, keys, etc.)
         p.randomSeed();
         p.level = new LEVEL(p,p.tiles);
@@ -99,6 +102,11 @@ s = function(p){
     p.reset = function(score = 0){
         p.level = new LEVEL(p,p.tiles);
         p.score = Number.isInteger(score) ? score : 0;
+    }
+
+    p.toggleDoubleJump = function(){
+        p.canDoubleJump = !p.canDoubleJump;
+        p.reset();
     }
 
     p.draw = function(){
