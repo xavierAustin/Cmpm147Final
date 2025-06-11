@@ -28,6 +28,8 @@ inputs = {
 
 s = function(p){
     p.preload = function(){
+        p.font = p.loadFont('./assets/fonts/DotGothic16-Regular.ttf');
+
         p.tiles = {
             sml:[p.loadImage('./assets/baseplatformtilesmall.png'),p.loadImage('./assets/platformtilesmallrocky.png'),p.loadImage('./assets/DirtTile2.png')],
             big:[p.loadImage('./assets/BasePlatformTile.png'),p.loadImage('./assets/DirtTile.png')]
@@ -100,6 +102,21 @@ s = function(p){
         p.widthHalf = p.width/2;
         p.heightHalf = p.height/2;
         p.canDoubleJump = false;
+
+        p.dropShadow = (blur, y, color = p.color(0,0,0,64)) =>{
+            if (Array.isArray(color)){
+                color = p.color(color);
+            }
+            p.drawingContext.shadowColor = color;
+            p.drawingContext.shadowBlur = blur;
+            p.drawingContext.shadowOffsetY = y;
+        }
+        p.clearDropShadow = () =>{
+            p.drawingContext.shadowColor = p.color(0,0,0,0);
+            p.drawingContext.shadowBlur = 0;
+            p.drawingContext.shadowOffsetY = 0; 
+        }
+        p.textFont(p.font);
     }
 
     p.reset = function(score = 0){
@@ -167,6 +184,7 @@ s = function(p){
         p.noStroke();
         p.fill(255);
         p.textSize(24);
+        p.dropShadow(4, 4, [0,0,0,200]);
         p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}\nScore: ${p.score}`, 20, 30);
         p.pop();
         //console.log(p.deltaTime)

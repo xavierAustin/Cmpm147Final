@@ -100,7 +100,7 @@ var designedRegions = [
         [F,F,F,1,1,1,5,F,5,1,F,F,0],
     ]}, //small cave
     {y0:0, y1: 0, p: [
-        [F,0,0,0,0,0,F]
+        [F,F,0,0,0,0,5,F,F]
     ]}, //big jump
     {y0:10, y1: 4, p: [
         [F,F,F,F,F,F,F,F,F,F,F],
