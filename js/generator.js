@@ -1,7 +1,7 @@
 var AllTiles = [];
 const REPLACE_BIG = 50 //percent chance that 4 tiles are merged into one big tile
 const PLATFORM_SIZE = 7; //number of tiles that make up a generated platform
-const D_RATIO = 100 //percent of chunks that use designed regions as opposed to generated ones
+const D_RATIO = 50 //percent of chunks that use designed regions as opposed to generated ones
 const F = 10; //just for easier readability for the designed regions; stands for filled
 // p = percent chance divided by 10 that a space is filled with a tile
 // y0 = y player is expected to be at (the first defined row is y = 1; 0 is atop the whole construction)
