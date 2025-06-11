@@ -158,6 +158,8 @@ class LEVEL {
 
         //spawn player at second to first chunk (aesthetic reasons)
         p.player = new PLAYER(p, p.playerSprites,this.chunks[1].x*TILESIZE-TILESIZE/2,(this.chunks[1].startY-2)*TILESIZE-1);
+        //spawn used door (see previous)
+        p.usedDoor = new DECORE(p,this.chunks[1].x*TILESIZE-TILESIZE/2,(this.chunks[1].startY-2)*TILESIZE-1,p.usedDoorImg)
         
         //spawn player just after second to last chunk (see previous)
         p.door = new Door(p, this.chunks.at(-1).x*TILESIZE-TILESIZE/2,(this.chunks.at(-1).startY-2)*TILESIZE-1, p.doorClosedImg, p.doorUnlockedImg, p.doorOpenImg);
@@ -179,6 +181,8 @@ class LEVEL {
 
     }
     draw(){
+        this.p.usedDoor.draw();
+
         //draw key
         for (let k of this.p.keys) {
             k.draw();

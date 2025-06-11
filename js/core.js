@@ -63,9 +63,12 @@ s = function(p){
 
         //box sprite
         p.box = p.loadImage('./assets/box.png');
+        
+        //door sprites
         p.doorClosedImg = p.loadImage('./assets/closed_door.png');
         p.doorOpenImg = p.loadImage('./assets/openopen_door.png');
         p.doorUnlockedImg = p.loadImage('./assets/open_door.png');
+        p.usedDoorImg = p.loadImage('./assets/used_door.png');
     }
 
     p.setup = function(){
