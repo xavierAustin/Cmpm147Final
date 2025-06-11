@@ -16,6 +16,7 @@ class PLAYER{
         this.sleepTimer = 0;
         this.grapple = null;
         this.BBinfo = {w:w,h:h,BBx:bbx,BBy:bby,hHalf:h/2};
+        this.hasDoubleJumped = false; // Track if player has used their double jump
     }
     update(){
         let x = this.col.getPosition("x");
@@ -40,6 +41,7 @@ class PLAYER{
                 if (this.jumpBuffer){
                     _dy = -2.7;
                     this.state = "jump";
+                    this.hasDoubleJumped = false; // Reset double jump when landing
                 }else if (move != 0)
                     this.state = "run";
                 else if (!grounded)
