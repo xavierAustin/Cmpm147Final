@@ -68,6 +68,7 @@ class Key {
         let temp = () => {
             this.collected = true;
             this.p.keysCollected++;
+            this.p.keySound.play();
             this.col.destroy();
             this.col = null;
         }

@@ -75,6 +75,8 @@ s = function(p){
         //Sound effects
         p.jumpSound = new Audio('./assets/jump1.ogg');
         p.stepSound = new Audio('./assets/step.ogg');
+        p.keySound = new Audio('./assets/powerUp2.ogg');
+        p.overSound = new Audio('./assets/powerUp1.ogg');
     }
 
     p.setup = function(){
@@ -232,6 +234,7 @@ s = function(p){
         //console.log(p.deltaTime)
         
         if (p.transitionIn){
+            p.overSound.play();
             p.push();
             p.fill(0,0,0,255)
             let t = p.transitionIn;
@@ -252,15 +255,6 @@ s = function(p){
         const action = KEYMMAP[e.code];
         if (action) {
             inputs[action] = { r: false, p: true, h: true };
-        }
-        if(action == 'jump'){ 
-            p.jumpSound.play();
-        }
-        if(action == 'left' || action == 'right'){ 
-            if (p.stepSound.paused) 
-                p.stepSound.play();
-            else if(!p.stepSound.paused)
-                p.stepSound.pause();
         }
     }
 

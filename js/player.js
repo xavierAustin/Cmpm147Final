@@ -42,8 +42,13 @@ class PLAYER{
                     _dy = -2.7;
                     this.state = "jump";
                     this.hasDoubleJumped = false; // Reset double jump when landing
-                }else if (move != 0)
+                }else if (move != 0){
                     this.state = "run";
+                    if (this.p.stepSound.paused) 
+                        this.p.stepSound.play();
+                    else if(!this.p.stepSound.paused)
+                        this.p.stepSound.pause();
+                }
                 else if (!grounded)
                     this.ctjump ++;
                 if (this.ctjump > 3)
@@ -68,6 +73,7 @@ class PLAYER{
             case "jump":
                 this.ctjump = 0;
                 this.jumpBuffer = 0;
+                this.p.jumpSound.play();
                 if (!inputs.jump.h && _dy < 0)
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
