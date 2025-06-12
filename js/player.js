@@ -42,6 +42,10 @@ class PLAYER{
                     _dy = -2.7;
                     this.state = "jump";
                     this.hasDoubleJumped = false; // Reset double jump when landing
+                    this.p.jumpSound.play();
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.currentTime = 0;
                 }else if (move != 0){
                     this.state = "run";
                     if (this.p.stepSound.paused) 
@@ -55,6 +59,8 @@ class PLAYER{
                     this.state = "fall";
             break;
             case "run":
+                if (this.p.stepSound.paused) 
+                    this.p.stepSound.play();
                 this.hasDoubleJumped = false;
                 _dx = (move+_dx*4)/5;
                 _dy = 1.5;
@@ -63,17 +69,22 @@ class PLAYER{
                 if (this.jumpBuffer){
                     _dy = -3.2;
                     this.state = "jump";
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
                 }else if (!grounded)
                     this.ctjump ++;
                 else if (move == 0)
                     this.state = "idle";
                 if (this.ctjump > 3)
                     this.state = "fall";
+                if (this.state != "run")
+                    this.p.stepSound.pause();
             break;
             case "jump":
                 this.ctjump = 0;
                 this.jumpBuffer = 0;
-                this.p.jumpSound.play();
                 if (!inputs.jump.h && _dy < 0)
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
@@ -83,11 +94,19 @@ class PLAYER{
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
                     _dy = -2.7;
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
                 }else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
                     _dy = -2.7;
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
                 }else if (inputs.act.h)
                     this.state = "crouch";
                 if (_dy > 1)
@@ -96,6 +115,10 @@ class PLAYER{
                     this.state = "idle";
                 else if (grounded)
                     this.state = "run";
+                if (grounded){
+                    this.p.landSound.currentTime = 0;
+                    this.p.landSound.play();
+                }
             break;
             case "fall":
                 this.ctjump = 0;
@@ -104,10 +127,18 @@ class PLAYER{
                 if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "crouch"; //crouch jump
                     this.hasDoubleJumped = true;
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
                     _dx = move * 1.3;
                     _dy = -2.7;
                 }else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
                     _dy = -2.7;
@@ -117,6 +148,10 @@ class PLAYER{
                     this.state = "idle";
                 else if (grounded && (_dy > 0))
                     this.state = "run";
+                if (grounded){
+                    this.p.landSound.currentTime = 0;
+                    this.p.landSound.play();
+                }
             break;
             case "crouch":
                 if (grounded)
@@ -125,19 +160,17 @@ class PLAYER{
                 _dx = (move + _dx*8)/9;
                 if (move != 0 && grounded && !this.jumpBuffer)
                     this.state = "crawl";
-                if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
+                if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.hasDoubleJumped = true; //crouch jump
-                    _dx = move * 1.5;
-                    _dy = -2.7;
-                } else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
-                    this.state = "jump";
-                    this.hasDoubleJumped = true;
                     _dx = move * 1.5;
                     _dy = -2.7;
                 }
                 if (this.jumpBuffer && grounded){
-                    this.state = "crouch";
                     _dy = -2.7;
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
                     if (this.p.canDoubleJump){
                         _dx = move * 1.5;
                         _dy = -2;
@@ -145,6 +178,10 @@ class PLAYER{
                     this.jumpBuffer = 0;
                 }
                 this.ctjump = 0;
+                if (grounded){
+                    //this.p.landSound.currentTime = 0;
+                    //this.p.landSound.play();
+                }
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
                 if (inputs.act.h || this.col.meetingSolid(x,y-this.BBinfo.hHalf))
                     break;
@@ -152,6 +189,10 @@ class PLAYER{
                 if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
                     _dx = move * 1.5;
                     _dy = -2.7;
                 }else if (!grounded)
@@ -170,6 +211,10 @@ class PLAYER{
                 if (this.jumpBuffer && grounded){
                     this.state = "crouch";
                     _dy = -2.7;
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
                     if (this.p.canDoubleJump){
                         _dx = move * 1.3;
                         _dy = -2;

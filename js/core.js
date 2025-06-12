@@ -74,9 +74,11 @@ s = function(p){
 
         //Sound effects
         p.jumpSound = new Audio('./assets/jump1.ogg');
-        p.stepSound = new Audio('./assets/step.ogg');
+        //p.stepSound = new Audio('./assets/step.ogg');
         p.keySound = new Audio('./assets/powerUp2.ogg');
         p.overSound = new Audio('./assets/powerUp1.ogg');
+        p.stepSound = new Audio('./assets/stepShort.ogg');
+        p.landSound = new Audio('./assets/land.ogg');
     }
 
     p.setup = function(){
@@ -263,7 +265,6 @@ s = function(p){
         if (action) {
             inputs[action] = { r: true, p: false, h: false };
         }
-        p.stepSound.pause();
     }
 
     p.generatePlatforms = function() {
