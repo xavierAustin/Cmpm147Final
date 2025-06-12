@@ -6,10 +6,10 @@ const F = 10; //just for easier readability for the designed regions; stands for
 // p = percent chance divided by 10 that a space is filled with a tile
 // y0 = y player is expected to be at (the first defined row is y = 1; 0 is atop the whole construction)
 // y1 = y player is expected to exit at
-function shuffle(array){
+function shuffle(array, p = Math){
     for (let i = array.length -1; i >= 0; i--){
         let temp = array[i];
-        let index = Math.floor(Math.random()*i)
+        let index = Math.floor(p.random()*i)
         array[i] = array[index];
         array[index] = temp;
     }
@@ -145,7 +145,7 @@ class LEVEL {
         this.chunks = [];
         let x = 5;
         let yStart = 0;
-        for (let i = Math.random()*10+5; i > 0; i --){
+        for (let i = p.random()*10+5; i > 0; i --){
             if (this.chunks.at(-1))
                 x += this.chunks.at(-1).w;
             this.chunks.push(new CHUNK(p,x,yStart,possibleimages));
@@ -168,12 +168,12 @@ class LEVEL {
         let locations = [];
         for (let i = 2; i < this.chunks.length - 1; i ++){
             locations.push({x: this.chunks[i].x*TILESIZE-TILESIZE/2, y:(this.chunks[i].startY-2)*TILESIZE-1});
-            console.log(locations);
+            //console.log(locations);
         }
-        shuffle(locations);
+        shuffle(locations,p);
         
         //spawn keys
-        p.totalKeys = Math.floor(Math.random()*locations.length+1);
+        p.totalKeys = Math.floor(p.random()*locations.length+1);
         p.keysCollected = 0;
         p.keys = []; //clear keys
         for (let i = 0; i < p.totalKeys; i ++)
@@ -211,10 +211,10 @@ class CHUNK {
         this.tiles = [];
         let design = [];
         let designInfo = {};
-        let doGenerate = Math.random()*100 > D_RATIO;
+        let doGenerate = p.random()*100 > D_RATIO;
         //generate a possible layout of tiles
         if (doGenerate){
-            this.w = Math.floor(Math.random()*10+5);
+            this.w = Math.floor(p.random()*10+5);
             this.h = Math.floor(p.height/TILESIZE)-1;
             let pStartCoords = [];
             for (let y = 0; y < this.h; y++){
@@ -263,9 +263,9 @@ class CHUNK {
         //place tiles in the level
         for (let y = 0; y < this.h; y++){
             for (let x = 0; x < this.w; x++){
-                if (Math.random()*9 >= design[y][x])
+                if (p.random()*9 >= design[y][x])
                     continue;
-                if (design[y+1] && design[y+1][x] && design[y+1][x+1] && design[y][x+1] && (Math.random()*100 < REPLACE_BIG)){
+                if (design[y+1] && design[y+1][x] && design[y+1][x+1] && design[y][x+1] && (p.random()*100 < REPLACE_BIG)){
                     design[y+1][x] = 0;
                     design[y+1][x+1] = 0;
                     design[y][x+1] = 0;
@@ -275,7 +275,7 @@ class CHUNK {
                 }
             }
         }
-        console.log(design);
+        //console.log(design);
         this.endY = (designInfo.y1-designInfo.y0)+this.startY;
     }
 }
