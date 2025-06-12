@@ -153,12 +153,7 @@ s = function(p){
             p.rect(0,0,       p.width, t*p.height/36);
             p.rect(0,p.height,p.width,-t*p.height/36);
             p.transitionOut -= 1 * (p.transitionOut > 0);
-            p.fill(255,255,255,255);
-            p.textSize(80);
-            p.textAlign(p.CENTER,p.CENTER);
-            p.dropShadow(4, 4, [0,0,0,200]);
-            p.text(p.score != 0? "Well Done!":"", p.width/2, p.height/2);
-            p.transitionIn = 36;
+            p.transitionIn = 36 + (p.score != 0) * 60;
             p.pop();
             //let t = (p.frameCount - p.transitionOut)/5;
             //p.translate(p.width/2, p.height/2);
@@ -224,7 +219,9 @@ s = function(p){
         p.noStroke();
         p.fill(255);
         p.textSize(24);
-        p.dropShadow(4, 4, [0,0,0,200]);
+        p.dropShadow(4, 4, [0,0,0,255]);
+        p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}\nScore: ${p.score}`, 20, 30);
+        //text visibility issues? just draw it twice :5head:
         p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}\nScore: ${p.score}`, 20, 30);
         p.pop();
         //console.log(p.deltaTime)
@@ -241,8 +238,7 @@ s = function(p){
             p.fill(255,255,255,255);
             p.textSize(80);
             p.textAlign(p.CENTER,p.CENTER);
-            p.dropShadow(4, 4, [0,0,0,200]);
-            p.text(p.score != 0? "Well Done!":"", p.width/2, p.height/2);
+            p.text((p.transitionIn > 36)? `Well Done!\nScore: ${p.score}`:"", p.width/2, p.height/2);
             p.pop();
         }
     }
