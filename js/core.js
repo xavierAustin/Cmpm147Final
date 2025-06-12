@@ -71,6 +71,10 @@ s = function(p){
         p.doorOpenImg = p.loadImage('./assets/openopen_door.png');
         p.doorUnlockedImg = p.loadImage('./assets/open_door.png');
         p.usedDoorImg = p.loadImage('./assets/used_door.png');
+
+        //Sound effects
+        p.jumpSound = new Audio('./assets/jump1.ogg');
+        p.stepSound = new Audio('./assets/step.ogg');
     }
 
     p.setup = function(){
@@ -120,6 +124,7 @@ s = function(p){
             p.drawingContext.shadowOffsetY = 0; 
         }
         p.textFont(p.font);
+        p.stepSound.loop = true;
     }
 
     p.setSeed = function(ev){
@@ -248,6 +253,15 @@ s = function(p){
         if (action) {
             inputs[action] = { r: false, p: true, h: true };
         }
+        if(action == 'jump'){ 
+            p.jumpSound.play();
+        }
+        if(action == 'left' || action == 'right'){ 
+            if (p.stepSound.paused) 
+                p.stepSound.play();
+            else if(!p.stepSound.paused)
+                p.stepSound.pause();
+        }
     }
 
     p.keyReleased = function(e) {
@@ -255,6 +269,7 @@ s = function(p){
         if (action) {
             inputs[action] = { r: true, p: false, h: false };
         }
+        p.stepSound.pause();
     }
 
     p.generatePlatforms = function() {
