@@ -98,7 +98,7 @@ s = function(p){
         //generate level (creates player, doors, keys, etc.)
         p.randomSeed();
         p.level = new LEVEL(p,p.tiles);
-        p.reset();
+        p.reset(0,false);
         p.widthHalf = p.width/2;
         p.heightHalf = p.height/2;
         p.canDoubleJump = false;
@@ -119,7 +119,9 @@ s = function(p){
         p.textFont(p.font);
     }
 
-    p.reset = function(score = 0){
+    p.reset = function(score = 0, doTransition = true){
+        if (doTransition === true)
+            p.transitionOut = 36;
         p.level = new LEVEL(p,p.tiles);
         p.score = Number.isInteger(score) ? score : 0;
     }
@@ -131,6 +133,29 @@ s = function(p){
     }
 
     p.draw = function(){
+        if (p.transitionOut){
+            p.push();
+            p.fill(0,0,0,255)
+            let t = 36 - p.transitionOut;
+            p.rect(0,      0, t*p.width/36,p.height);
+            p.rect(p.width,0,-t*p.width/36,p.height);
+            p.rect(0,0,       p.width, t*p.height/36);
+            p.rect(0,p.height,p.width,-t*p.height/36);
+            p.transitionOut -= 1 * (p.transitionOut > 0);
+            p.fill(255,255,255,255);
+            p.textSize(80);
+            p.textAlign(p.CENTER,p.CENTER);
+            p.dropShadow(4, 4, [0,0,0,200]);
+            p.text(p.score != 0? "Well Done!":"", p.width/2, p.height/2);
+            p.transitionIn = 36;
+            p.pop();
+            //let t = (p.frameCount - p.transitionOut)/5;
+            //p.translate(p.width/2, p.height/2);
+            //p.rotate(t);
+            //p.ellipse(0, t*t/2, t*t/2, t*t);
+            //p.transitionOut = p.transitionOut * (t < 36);
+            return;
+        }
         // Update camera position to follow player
         let targetOffset = {
             x: p.player.col.getPosition("x") - p.widthHalf + p.player.facing * TILESIZE + p.player.col.getBounds("w"),
@@ -155,6 +180,10 @@ s = function(p){
             inputs[keys[i]].p = false;
             inputs[keys[i]].r = false;
         }
+        
+        //if the death barier or door calls p.reset this stops the next frame from drawing
+        if (p.transitionOut)
+            return;
 
         //draw background
         //p.image(p.backgroundImage,0,0,p.width,p.height)
@@ -188,6 +217,23 @@ s = function(p){
         p.text(`Keys: ${p.keysCollected} / ${p.totalKeys}\nScore: ${p.score}`, 20, 30);
         p.pop();
         //console.log(p.deltaTime)
+        
+        if (p.transitionIn){
+            p.push();
+            p.fill(0,0,0,255)
+            let t = p.transitionIn;
+            p.rect(0,      0, t*p.width/36,p.height);
+            p.rect(p.width,0,-t*p.width/36,p.height);
+            p.rect(0,0,       p.width, t*p.height/36);
+            p.rect(0,p.height,p.width,-t*p.height/36);
+            p.transitionIn -= 1 * (p.transitionIn > 0);
+            p.fill(255,255,255,255);
+            p.textSize(80);
+            p.textAlign(p.CENTER,p.CENTER);
+            p.dropShadow(4, 4, [0,0,0,200]);
+            p.text(p.score != 0? "Well Done!":"", p.width/2, p.height/2);
+            p.pop();
+        }
     }
 
     p.keyPressed = function(e) {
