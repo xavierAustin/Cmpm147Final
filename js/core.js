@@ -92,6 +92,9 @@ s = function(p){
         let button = document.getElementById("randomizeBtn");
         button.addEventListener("click", p.reset);
 
+        let input = document.getElementById("seedInput");
+        input.addEventListener("keypress", p.setSeed);
+
         button = document.getElementById("doubleJmpBtn");
         button.addEventListener("click", p.toggleDoubleJump);
 
@@ -117,6 +120,14 @@ s = function(p){
             p.drawingContext.shadowOffsetY = 0; 
         }
         p.textFont(p.font);
+    }
+
+    p.setSeed = function(ev){
+        //console.log(ev)
+        if (ev.code == "Enter"){
+            p.randomSeed(parseInt(document.getElementById("seedInput").value,36));
+            p.reset();
+        }
     }
 
     p.reset = function(score = 0, doTransition = true){
