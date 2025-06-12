@@ -17,6 +17,14 @@ class PLAYER{
         this.grapple = null;
         this.BBinfo = {w:w,h:h,BBx:bbx,BBy:bby,hHalf:h/2};
         this.hasDoubleJumped = false; // Track if player has used their double jump
+        this.isWallSliding = false; // Track if player is wall sliding
+        this.wallDirection = 0; // -1 for left wall, 1 for right wall
+        this.lastWallDirection = 0; // Track the last wall direction for wall jump restrictions
+        this.wallSlideTimer = 0; // Timer for wall slide duration
+        this.chargeTimer = 0; // Timer for charge jump
+        this.isCharging = false; // Whether player is charging a jump
+        this.blinkTimer = 0; // Timer for blinking effect
+        this.isVisible = true; // For blinking effect
     }
     update(){
         let x = this.col.getPosition("x");
@@ -27,6 +35,49 @@ class PLAYER{
         let grounded = this.col.meetingSolid(x,y+2);
         this.aim = (inputs.down.h-inputs.up.h);
         this.jumpBuffer = Math.max(this.jumpBuffer - 1, 0);
+
+        // Wall detection variables
+        let onLeftWall = this.col.meetingSolid(x-1, y);
+        let onRightWall = this.col.meetingSolid(x+1, y);
+        
+        // Check for wall sliding
+        if ((onLeftWall || onRightWall) && !grounded && _dy > 0) {
+            this.isWallSliding = true;
+            this.wallDirection = onLeftWall ? -1 : 1;
+            this.wallSlideTimer = 0;
+            _dy = Math.min(_dy, 0.5); // Slow down falling speed while wall sliding
+        } else {
+            this.isWallSliding = false;
+        }
+
+        // Handle charge jump
+        if (inputs.act.h && grounded && move === 0 && !this.isCharging) {
+            this.isCharging = true;
+            this.chargeTimer = 0;
+        } else if (this.isCharging) {
+            if (!inputs.act.h || move !== 0 || !grounded) {
+                // Release charge jump
+                if (this.chargeTimer >= 120) { // 2 seconds at 60fps
+                    _dy = -8.1; // 3x normal jump height
+                    this.state = "jump";
+                    this.p.jumpSound.currentTime = 0;
+                    this.p.jumpSound.preservesPitch = false;
+                    this.p.jumpSound.playbackRate = 0.7+Math.random();
+                    this.p.jumpSound.play();
+                }
+                this.isCharging = false;
+                this.chargeTimer = 0;
+                this.isVisible = true;
+            } else {
+                this.chargeTimer++;
+                // Blinking effect when fully charged
+                if (this.chargeTimer >= 120) {
+                    this.blinkTimer = (this.blinkTimer + 1) % 10;
+                    this.isVisible = this.blinkTimer < 5;
+                }
+            }
+        }
+
         //console.log(this.jumpBuffer);
         //6 frames buffer (if you press jump early youll jump whenever possible)
         if (inputs.jump.p)
@@ -84,21 +135,25 @@ class PLAYER{
             break;
             case "jump":
                 this.ctjump = 0;
-                this.jumpBuffer = 0;
                 if (!inputs.jump.h && _dy < 0)
                     _dy *= 0.6;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.17-0.1*(_dy > -1 && inputs.jump.h);
-                if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
-                    this.state = "crouch"; //crouch jump
-                    this.hasDoubleJumped = true;
-                    _dx = move * 1.3;
-                    _dy = -2.7;
-                    this.p.jumpSound.currentTime = 0;
-                    this.p.jumpSound.preservesPitch = false;
-                    this.p.jumpSound.playbackRate = 0.7+Math.random();
-                    this.p.jumpSound.play();
-                }else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
+
+                // Wall jump logic
+                if (this.isWallSliding && inputs.jump.p && this.p.canDoubleJump) {
+                    if (this.wallDirection !== this.lastWallDirection || grounded) {
+                        this.state = "jump";
+                        this.hasDoubleJumped = true;
+                        _dx = -this.wallDirection * 2.5; // Jump away from wall
+                        _dy = -2.7;
+                        this.lastWallDirection = this.wallDirection;
+                        this.p.jumpSound.currentTime = 0;
+                        this.p.jumpSound.preservesPitch = false;
+                        this.p.jumpSound.playbackRate = 0.7+Math.random();
+                        this.p.jumpSound.play();
+                    }
+                } else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
@@ -107,8 +162,8 @@ class PLAYER{
                     this.p.jumpSound.preservesPitch = false;
                     this.p.jumpSound.playbackRate = 0.7+Math.random();
                     this.p.jumpSound.play();
-                }else if (inputs.act.h)
-                    this.state = "crouch";
+                }
+
                 if (_dy > 1)
                     this.state = "fall";
                 else if (move == 0 && grounded)
@@ -118,22 +173,28 @@ class PLAYER{
                 if (grounded){
                     this.p.landSound.currentTime = 0;
                     this.p.landSound.play();
+                    this.lastWallDirection = 0; // Reset last wall direction when landing
                 }
             break;
             case "fall":
                 this.ctjump = 0;
                 _dx = (move + _dx*8)/9;
                 _dy += 0.25;
-                if (inputs.jump.p && inputs.act.h && this.p.canDoubleJump && !this.hasDoubleJumped){
-                    this.state = "crouch"; //crouch jump
-                    this.hasDoubleJumped = true;
-                    this.p.jumpSound.currentTime = 0;
-                    this.p.jumpSound.preservesPitch = false;
-                    this.p.jumpSound.playbackRate = 0.7+Math.random();
-                    this.p.jumpSound.play();
-                    _dx = move * 1.3;
-                    _dy = -2.7;
-                }else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
+
+                // Wall jump logic
+                if (this.isWallSliding && inputs.jump.p && this.p.canDoubleJump) {
+                    if (this.wallDirection !== this.lastWallDirection || grounded) {
+                        this.state = "jump";
+                        this.hasDoubleJumped = true;
+                        _dx = -this.wallDirection * 2.5; // Jump away from wall
+                        _dy = -2.7;
+                        this.lastWallDirection = this.wallDirection;
+                        this.p.jumpSound.currentTime = 0;
+                        this.p.jumpSound.preservesPitch = false;
+                        this.p.jumpSound.playbackRate = 0.7+Math.random();
+                        this.p.jumpSound.play();
+                    }
+                } else if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
                     this.state = "jump";
                     this.p.jumpSound.currentTime = 0;
                     this.p.jumpSound.preservesPitch = false;
@@ -146,11 +207,12 @@ class PLAYER{
                     this.state = "crouch";
                 else if (move == 0 && (_dy > 0) && grounded)
                     this.state = "idle";
-                else if (grounded && (_dy > 0))
+                else if (grounded)
                     this.state = "run";
                 if (grounded){
                     this.p.landSound.currentTime = 0;
                     this.p.landSound.play();
+                    this.lastWallDirection = 0; // Reset last wall direction when landing
                 }
             break;
             case "crouch":
@@ -160,42 +222,24 @@ class PLAYER{
                 _dx = (move + _dx*8)/9;
                 if (move != 0 && grounded && !this.jumpBuffer)
                     this.state = "crawl";
-                if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
-                    this.hasDoubleJumped = true; //crouch jump
-                    _dx = move * 1.5;
-                    _dy = -2.7;
-                }
                 if (this.jumpBuffer && grounded){
-                    _dy = -2.7;
+                    _dy = -4.0; // Higher crouch jump
+                    this.state = "jump";
                     this.p.jumpSound.currentTime = 0;
                     this.p.jumpSound.preservesPitch = false;
                     this.p.jumpSound.playbackRate = 0.7+Math.random();
                     this.p.jumpSound.play();
-                    if (this.p.canDoubleJump){
-                        _dx = move * 1.5;
-                        _dy = -2;
-                    }
                     this.jumpBuffer = 0;
                 }
                 this.ctjump = 0;
                 if (grounded){
-                    //this.p.landSound.currentTime = 0;
                     //this.p.landSound.play();
                 }
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
                 if (inputs.act.h || this.col.meetingSolid(x,y-this.BBinfo.hHalf))
                     break;
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.h,this.BBinfo.BBx,this.BBinfo.BBy);
-                if (inputs.jump.p && this.p.canDoubleJump && !this.hasDoubleJumped){
-                    this.state = "jump";
-                    this.hasDoubleJumped = true;
-                    this.p.jumpSound.currentTime = 0;
-                    this.p.jumpSound.preservesPitch = false;
-                    this.p.jumpSound.playbackRate = 0.7+Math.random();
-                    this.p.jumpSound.play();
-                    _dx = move * 1.5;
-                    _dy = -2.7;
-                }else if (!grounded)
+                if (!grounded)
                     this.state = "fall";
                 else if (move == 0)
                     this.state = "idle";
@@ -210,15 +254,11 @@ class PLAYER{
                     this.state = "crouch";
                 if (this.jumpBuffer && grounded){
                     this.state = "crouch";
-                    _dy = -2.7;
+                    _dy = -4.0; // Higher crouch jump
                     this.p.jumpSound.currentTime = 0;
                     this.p.jumpSound.preservesPitch = false;
                     this.p.jumpSound.playbackRate = 0.7+Math.random();
                     this.p.jumpSound.play();
-                    if (this.p.canDoubleJump){
-                        _dx = move * 1.3;
-                        _dy = -2;
-                    }
                     this.jumpBuffer = 0;
                 }
                 this.col.setBounds(this.BBinfo.w,this.BBinfo.hHalf,this.BBinfo.BBx,this.BBinfo.BBy+this.BBinfo.hHalf);
@@ -273,8 +313,10 @@ class PLAYER{
         this.p.translate(this.col.getPosition("x"),this.col.getPosition("y"));
         this.p.translate((this.facing == -1)? 128 : 0, 0);
         this.p.scale(this.facing,1);
-        let temp = this.anim[this.anim_current].length
-        this.p.image(this.anim[this.anim_current][Math.floor(this.anim_index) % temp],0,0,128,128);
+        let temp = this.anim[this.anim_current].length;
+        if (this.isVisible || !this.isCharging) {
+            this.p.image(this.anim[this.anim_current][Math.floor(this.anim_index) % temp],0,0,128,128);
+        }
         this.p.pop();
     }
 }
