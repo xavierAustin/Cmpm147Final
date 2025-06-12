@@ -152,6 +152,7 @@ s = function(p){
 
     p.draw = function(){
         if (p.transitionOut){
+            p.overSound.play();
             p.push();
             p.fill(0,0,0,255)
             let t = 36 - p.transitionOut;
@@ -234,7 +235,6 @@ s = function(p){
         //console.log(p.deltaTime)
         
         if (p.transitionIn){
-            p.overSound.play();
             p.push();
             p.fill(0,0,0,255)
             let t = p.transitionIn;
