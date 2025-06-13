@@ -184,6 +184,9 @@ s = function(p){
         }
         if (p.transitionIn > 30 && p.transitionIn < 37)
             p.fadeinSound.play();
+        if (p.transitionIn)
+            for (let i in inputs)
+                inputs[i] = {r: false, p: false, h: false};
         // Update camera position to follow player
         let targetOffset = {
             x: p.player.col.getPosition("x") - p.widthHalf + p.player.facing * TILESIZE + p.player.col.getBounds("w"),

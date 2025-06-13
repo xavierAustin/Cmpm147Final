@@ -12,6 +12,7 @@ class PLAYER{
         this.anim_current = "idle";
         this.facing = 1;
         this.aim = 0;
+        this.airCrouch = false;
         this.hasDoubleJumped = false; // Track if player has used their double jump
         this.sleepTimer = 0;
         this.grapple = null;
@@ -34,6 +35,7 @@ class PLAYER{
         switch (this.state){
             default:
                 this.hasDoubleJumped = false;
+                this.airCrouch = true;
                 _dx /= 5;
                 _dy = 1.5;
                 if (inputs.act.h)
@@ -59,6 +61,7 @@ class PLAYER{
                     this.state = "fall";
             break;
             case "run":
+                this.airCrouch = true;
                 if (this.p.stepSound.paused) 
                     this.p.stepSound.play();
                 this.hasDoubleJumped = false;
@@ -110,6 +113,7 @@ class PLAYER{
                 }else if (inputs.act.h){
                     this.state = "crouch";
                     _dy -= 1;
+                    this.airCrouch = false;
                 }if (_dy > 1)
                     this.state = "fall";
                 else if (move == 0 && grounded)
@@ -143,9 +147,11 @@ class PLAYER{
                     this.hasDoubleJumped = true;
                     _dx = move * 1.3;
                     _dy = -2.7;
-                }else if (inputs.act.h)
+                }else if (inputs.act.h){
                     this.state = "crouch";
-                else if (move == 0 && (_dy > 0) && grounded)
+                    _dy -= this.airCrouch;
+                    this.airCrouch = false;
+                }else if (move == 0 && (_dy > 0) && grounded)
                     this.state = "idle";
                 else if (grounded && (_dy > 0))
                     this.state = "run";
@@ -155,8 +161,10 @@ class PLAYER{
                 }
             break;
             case "crouch":
-                if (grounded)
+                if (grounded){
                     this.hasDoubleJumped = false;
+                    this.airCrouch = true;
+                }
                 _dy += 0.25 - 0.08*(this.p.canDoubleJump);
                 _dx = (move + _dx*8)/9;
                 if (move != 0 && grounded && !this.jumpBuffer)
@@ -205,6 +213,7 @@ class PLAYER{
             break;
             case "crawl":
                 this.hasDoubleJumped = false;
+                this.airCrouch = true;
                 _dx = (move+_dx*4)/7;
                 _dy = 1.5;
                 if (move == 0 || !grounded)
