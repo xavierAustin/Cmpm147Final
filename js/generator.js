@@ -154,7 +154,7 @@ class LEVEL {
         p.worldWidth = (this.chunks.at(-1).w + this.chunks.at(-1).x + 5) * TILESIZE;
 
         p.floor = new COLLIDER(p.worldWidth, TILESIZE, 0, p.height+TILESIZE*4);
-        p.floor.addListener("y",p.reset);
+        p.floor.addListener("y",p.die);
 
         //spawn player at second to first chunk (aesthetic reasons)
         p.player = new PLAYER(p, p.playerSprites,this.chunks[1].x*TILESIZE-TILESIZE/2,(this.chunks[1].startY-2)*TILESIZE-1);

@@ -76,7 +76,10 @@ s = function(p){
         p.jumpSound = new Audio('./assets/jump1.ogg');
         //p.stepSound = new Audio('./assets/step.ogg');
         p.keySound = new Audio('./assets/powerUp2.ogg');
-        p.overSound = new Audio('./assets/powerUp1.ogg');
+        p.overSound = new Audio('./assets/fall-out1.ogg');
+        p.winSound = new Audio('./assets/powerUp1.ogg');
+        p.fadeoutSound = new Audio('./assets/transition.ogg');
+        p.fadeinSound = new Audio('./assets/transitionin.ogg');
         p.stepSound = new Audio('./assets/stepShort.ogg');
         p.landSound = new Audio('./assets/land.ogg');
     }
@@ -146,6 +149,12 @@ s = function(p){
         p.score = Number.isInteger(score) ? score : 0;
     }
 
+    p.die = function(){
+        p.reset();
+        p.overSound.play();
+        p.transitionOut = 136;
+    }
+
     p.toggleDoubleJump = function(){
         p.canDoubleJump = !p.canDoubleJump;
         document.getElementById("doubleJmpBtn").innerHTML = "More Movement Mode (Currently "+(p.canDoubleJump? "On" : "Off")+")";
@@ -153,8 +162,9 @@ s = function(p){
     }
 
     p.draw = function(){
+        if (p.transitionOut > 30 && p.transitionOut < 37)
+            p.fadeoutSound.play();
         if (p.transitionOut){
-            p.overSound.play();
             p.push();
             p.fill(0,0,0,255)
             let t = 36 - p.transitionOut;
@@ -172,6 +182,8 @@ s = function(p){
             //p.transitionOut = p.transitionOut * (t < 36);
             return;
         }
+        if (p.transitionIn > 30 && p.transitionIn < 37)
+            p.fadeinSound.play();
         // Update camera position to follow player
         let targetOffset = {
             x: p.player.col.getPosition("x") - p.widthHalf + p.player.facing * TILESIZE + p.player.col.getBounds("w"),

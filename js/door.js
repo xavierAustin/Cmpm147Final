@@ -23,6 +23,7 @@ class Door {
             let temp = () => {
                 this.p.score ++;
                 this.p.reset(this.p.score);
+                this.p.winSound.play();
                 this.p.stepSound.pause();
             }
             this.col.addListener("x",temp);

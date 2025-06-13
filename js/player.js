@@ -107,9 +107,10 @@ class PLAYER{
                     this.p.jumpSound.preservesPitch = false;
                     this.p.jumpSound.playbackRate = 0.7+Math.random();
                     this.p.jumpSound.play();
-                }else if (inputs.act.h)
+                }else if (inputs.act.h){
                     this.state = "crouch";
-                if (_dy > 1)
+                    _dy -= 1;
+                }if (_dy > 1)
                     this.state = "fall";
                 else if (move == 0 && grounded)
                     this.state = "idle";
