@@ -73,13 +73,13 @@ s = function(p){
         p.usedDoorImg = p.loadImage('./assets/used_door.png');
 
         //Sound effects
-        p.jumpSound = new Audio('./assets/jump1.ogg');
+        p.jumpSound = new Audio('./assets/jump3.ogg');
         //p.stepSound = new Audio('./assets/step.ogg');
-        p.keySound = new Audio('./assets/powerUp2.ogg');
+        p.keySound = new Audio('./assets/pickup.ogg');
         p.overSound = new Audio('./assets/fall-out1.ogg');
         p.winSound = new Audio('./assets/powerUp1.ogg');
-        p.fadeoutSound = new Audio('./assets/transition.ogg');
-        p.fadeinSound = new Audio('./assets/transitionin.ogg');
+        p.fadeoutSound = new Audio('./assets/transition1.ogg');
+        p.fadeinSound = new Audio('./assets/transitionin1.ogg');
         p.stepSound = new Audio('./assets/stepShort.ogg');
         p.landSound = new Audio('./assets/land.ogg');
     }
@@ -172,7 +172,7 @@ s = function(p){
             p.rect(p.width,0,-t*p.width/36,p.height);
             p.rect(0,0,       p.width, t*p.height/36);
             p.rect(0,p.height,p.width,-t*p.height/36);
-            p.transitionOut -= 1 * (p.transitionOut > 0);
+            p.transitionOut -= 1 //* (p.transitionOut > 0);
             p.transitionIn = 36 + (p.score != 0) * 60;
             p.pop();
             //let t = (p.frameCount - p.transitionOut)/5;
@@ -259,7 +259,7 @@ s = function(p){
             p.rect(p.width,0,-t*p.width/36,p.height);
             p.rect(0,0,       p.width, t*p.height/36);
             p.rect(0,p.height,p.width,-t*p.height/36);
-            p.transitionIn -= 1 * (p.transitionIn > 0);
+            p.transitionIn -= 1 //* (p.transitionIn > 0);
             p.fill(255,255,255,255);
             p.textSize(80);
             p.textAlign(p.CENTER,p.CENTER);
